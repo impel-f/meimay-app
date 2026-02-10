@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/gemini",
-      "dest": "/api/gemini.js"
+      "source": "/api/gemini",
+      "destination": "/api/gemini.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/public/$1"
+      "source": "/(.*)",
+      "destination": "/public/$1"
     }
   ]
 }
