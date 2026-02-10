@@ -1,153 +1,126 @@
-/* ============================================================
-   MODULE 08: ORIGIN (V15.0 - Gemini-powered)
-   由来生成（Gemini API統合）
-   ============================================================ */
+/**
+ * ============================================================
+ * MODULE 08: NAME ORIGIN GENERATOR (V13.0 - 簡潔モード)
+ * ============================================================
+ */
 
 /**
- * 由来文の生成（Gemini API使用）
+ * 由来を生成（ビルド結果から呼び出し）
  */
 async function generateOrigin() {
+    if (!currentBuildResult || !currentBuildResult.givenName) {
+        alert('名前が決定されていません');
+        return;
+    }
+
+    const { givenName, combination } = currentBuildResult;
+    console.log(`ORIGIN: 「${givenName}」の由来を簡潔モードで生成します。`);
+
+    // モーダルの準備（既存の modal-origin を使用）
     const modal = document.getElementById('modal-origin');
     if (!modal) return;
     
-    const textEl = modal.querySelector('p');
-    if (!textEl) return;
-    
-    textEl.innerText = '由来を生成中...';
+    // 待機中UIの表示
     modal.classList.add('active');
-    
-    const combo = currentBuildResult.combination;
-    if (!combo || combo.length === 0) {
-        textEl.innerText = '名前データが見つかりません';
-        return;
-    }
-    
+    modal.innerHTML = `
+        <div class="detail-sheet animate-fade-in flex flex-col items-center">
+            <div class="text-[10px] font-black text-[#bca37f] mb-8 tracking-widest opacity-60 uppercase">AI Writing Service</div>
+            <div class="flex flex-col items-center py-20 text-center">
+                <div class="w-10 h-10 border-4 border-[#eee5d8] border-t-[#bca37f] rounded-full animate-spin mb-6"></div>
+                <p class="text-[12px] font-bold text-[#7a6f5a] leading-loose">
+                    「${givenName}」の由来を<br>抽出しています。
+                </p>
+            </div>
+        </div>
+    `;
+
+    // 漢字の意味データを整理（likedデータから取得）
+    const originDetails = combination.map(c => {
+        const src = (typeof liked !== 'undefined') ? liked.find(l => l['漢字'] === c['漢字']) : null;
+        return `【${c['漢字']}】：${src ? src['意味'] : "良い意味"}`;
+    }).join('\n');
+
+    // プロンプト作成（提示された内容を反映）
+    const prompt = `
+名前「${givenName}」の由来を、以下の漢字データのみを使って、漢字の意味を生かして100文字から150文字程度で簡潔に作成してください。
+
+【禁止事項】
+・「生命の誕生は～」「親の愛は～」などの前置きは一切不要です。
+・名字についての言及、名字との響きについての解説も一切書かないでください。
+
+【作成ルール】
+・提示された漢字の意味（${givenName}）に直結した、一人の人間としての成長や願いだけを直球で書いてください。
+・1ブロックの文章（ですます調）でまとめてください。
+
+【漢字データ】
+${originDetails}
+    `.trim();
+
     try {
-        const originText = await generateOriginWithGemini(combo);
-        textEl.innerText = originText;
-    } catch (error) {
-        console.error('ORIGIN: Generation error', error);
-        // フォールバック：テンプレート版
-        textEl.innerText = buildTemplateOrigin(combo);
-    }
-}
-
-/**
- * Gemini APIで由来生成
- */
-async function generateOriginWithGemini(combo) {
-    // GitHub Secrets経由でAPIキーを取得
-    const apiKey = window.GEMINI_API_KEY || import.meta.env?.VITE_GEMINI_API_KEY;
-    
-    if (!apiKey) {
-        console.warn('ORIGIN: No Gemini API key, using template');
-        return buildTemplateOrigin(combo);
-    }
-    
-    const kanjiStr = combo.map(k => k['漢字']).join('');
-    const meanings = combo.map(k => {
-        const m = clean(k['意味']);
-        return m.split(/[。、]/)[0];
-    });
-    
-    const genderText = gender === 'male' ? '男の子' : gender === 'female' ? '女の子' : 'お子さん';
-    
-    const prompt = `${genderText}の名前「${kanjiStr}」の由来を、親の視点で心を込めて書いてください。
-
-漢字の情報：
-${combo.map((k, i) => `${i+1}文字目「${k['漢字']}」: ${meanings[i]}`).join('\n')}
-
-条件：
-- 200〜300文字程度
-- 親が子供に語りかけるような温かい文体
-- 各漢字の意味を自然に織り込む
-- 具体的なエピソードや願いを含める
-- テンプレート感を出さず、オリジナリティのある文章に
-- 「〜という意味を持つ漢字」のような説明的な表現は避ける
-
-出力は由来文のみで、前置きや補足説明は不要です。`;
-    
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+        // Vercel Serverless Function (/api/gemini) へリクエスト
+        const response = await fetch('/api/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: prompt }]
-                }],
-                generationConfig: {
-                    temperature: 0.8,
-                    maxOutputTokens: 500
-                }
-            })
+            body: JSON.stringify({ prompt: prompt })
         });
-        
+
+        if (!response.ok) throw new Error('AI生成に失敗しました');
+
         const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        
-        if (!text) {
-            throw new Error('No response from Gemini');
-        }
-        
-        // 文字数制限（350文字以内）
-        if (text.length > 350) {
-            return text.substring(0, 347) + '...';
-        }
-        
-        return text;
-        
-    } catch (error) {
-        console.error('ORIGIN: Gemini API error', error);
-        throw error;
+        const aiText = data.text || '由来を生成できませんでした。';
+
+        // 結果の描画
+        renderAIOriginResult(givenName, aiText);
+
+    } catch (err) {
+        console.error("AI_FAILURE:", err);
+        modal.innerHTML = `
+            <div class="detail-sheet flex flex-col items-center text-center">
+                <p class="text-[12px] text-red-700 font-bold mb-8">エラーが発生しました: ${err.message}</p>
+                <button onclick="closeOriginModal()" class="w-full py-5 bg-white border border-[#eee5d8] rounded-[35px] text-[#a6967a] font-black">閉じる</button>
+            </div>
+        `;
     }
 }
 
 /**
- * テンプレート版由来生成（フォールバック）
+ * 結果描画（提示されたモダンなデザイン）
  */
-function buildTemplateOrigin(combo) {
-    const k = combo.map(x => x['漢字']).join('');
-    const m = combo.map(x => clean(x['意味']).split(/[。、]/)[0]);
-    
-    const templates = [
-        `この名前を考えたのは、ある静かな夜のことでした。\n\n「${m[0]}」${m[1] ? `、「${m[1]}」` : ''}${m[2] ? `、「${m[2]}」` : ''}という言葉が心に浮かび、自然と「${k}」という名前が生まれました。\n\n${getWish()}`,
-        
-        `「${k}」\n\nこの名前には、大切な願いが込められています。\n\n${combo.length}つの漢字それぞれに想いを託し、人生という長い旅路で、この名前があなたの道標となりますように。`,
-        
-        `命名の日、家族で集まってこの名前について語り合いました。\n\n「${k}」という響き。声に出すと、とても温かく優しい音が響きました。\n\nこの名前を呼ぶたび、あなたの笑顔を思い浮かべるでしょう。`,
-        
-        `あなたが生まれる前から、この名前は心の中にありました。\n\n何冊もの本を読み、何百もの名前を書き出しました。そして最後に残ったのが「${k}」でした。\n\n不思議なことに、この名前を見た瞬間、「これだ」と確信しました。`,
-        
-        `「${k}」\n\n一文字ずつ、丁寧に選び抜いた漢字。\n\nまっすぐに、のびのびと。優しく、強く。\n\nこの名前に込めたのは、ただ一つ。あなたが、あなたらしく輝いてほしいという願いです。`
-    ];
-    
-    return templates[Math.floor(Math.random() * templates.length)];
+function renderAIOriginResult(givenName, text) {
+    const modal = document.getElementById('modal-origin');
+    if (!modal) return;
+
+    modal.innerHTML = `
+        <div class="detail-sheet animate-fade-in flex flex-col items-center max-w-[420px]">
+            <div class="text-[10px] font-black text-[#bca37f] mb-8 tracking-widest opacity-60 uppercase">The Origin Story</div>
+            
+            <div class="text-6xl font-black text-[#5d5444] mb-10 tracking-tight">${givenName}</div>
+
+            <div class="w-full bg-[#fdfaf5] border border-[#eee5d8] rounded-[40px] p-8 mb-10 shadow-inner overflow-y-auto max-h-[50vh] no-scrollbar">
+                <p class="text-[14px] leading-relaxed text-[#5d5444] font-bold whitespace-pre-wrap">${text}</p>
+            </div>
+
+            <div class="flex flex-col gap-3 w-full">
+                <button onclick="copyOriginToClipboard()" class="w-full py-5 bg-[#5d5444] text-white rounded-[35px] font-black uppercase tracking-widest">📋 由来をコピー</button>
+                <button onclick="closeOriginModal()" class="w-full py-5 bg-white border border-[#eee5d8] rounded-[35px] text-[#a6967a] font-black uppercase tracking-widest">閉じる</button>
+            </div>
+        </div>
+    `;
 }
 
-function getWish() {
-    const wishes = {
-        'male': [
-            '誠実で、周りの人から信頼される人になってほしい。',
-            '困難に立ち向かう勇気と、優しさを持った人になってほしい。',
-            '自分の道を堂々と歩み、人生を切り拓いていってほしい。'
-        ],
-        'female': [
-            '優しさと強さを兼ね備えた、素敵な人になってほしい。',
-            '自分らしく輝き、周りの人を笑顔にできる人になってほしい。',
-            'しなやかで芯の強い、美しい心を持った人になってほしい。'
-        ],
-        'unspecified': [
-            '自分らしく、のびのびと成長してほしい。',
-            '心豊かに、幸せな人生を歩んでほしい。',
-            '周りの人を大切にし、大切にされる人になってほしい。'
-        ]
-    };
-    
-    const w = wishes[gender] || wishes['unspecified'];
-    return w[Math.floor(Math.random() * w.length)];
+function closeOriginModal() {
+    const m = document.getElementById('modal-origin');
+    if (m) m.classList.remove('active');
 }
 
-console.log("ORIGIN: Module loaded (Gemini-powered)");
+function copyOriginToClipboard() {
+    const p = document.querySelector('#modal-origin p');
+    if (p) {
+        navigator.clipboard.writeText(p.innerText.trim()).then(() => alert("由来をコピーしました。"));
+    }
+}
 
-/* public/js/08-origin.js の一番最後に追加 */
+// グローバルに公開（HTMLのonclickから呼べるようにする）
 window.generateOrigin = generateOrigin;
+window.closeOriginModal = closeOriginModal;
+window.copyOriginToClipboard = copyOriginToClipboard;
