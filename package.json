@@ -1,0 +1,20 @@
+{
+  "name": "meimay",
+  "version": "1.0.0",
+  "description": "メイメー - めぇ〜っと見つかる、運命の名前。赤ちゃんの命名アプリ",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "vercel build",
+    "deploy": "vercel --prod"
+  },
+  "keywords": ["baby", "name", "fortune", "AI", "meimay", "命名"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.1.3"
+  }
+}
