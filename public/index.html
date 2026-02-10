@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#bca37f">
+    <meta name="description" content="赤ちゃんの命名を楽しくサポート。Tinder風スワイプで理想の名前を見つけよう。">
+    <title>メイメー - 赤ちゃんの命名アプリ</title>
+    
+    <link rel="manifest" href="/manifest.json">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+    <button onclick="openHistory()" class="fixed top-6 right-6 z-50 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-2xl hover:scale-110 transition-transform" style="border: 2px solid #eee5d8;">
+        📚
+    </button>
+
+    <div id="scr-mode" class="screen active">
+        <div class="flex flex-col items-center justify-center h-full">
+            <h1 class="title-premium">メイメー</h1>
+            <p class="subtitle-premium">Meimay - Baby Name Building</p>
+            <div id="status" class="text-[10px] text-[#bca37f] mb-12 tracking-widest font-bold uppercase">Initializing...</div>
+            <div class="space-y-4 w-full max-w-sm flex flex-col items-center px-6">
+                <button onclick="changeScreen('scr-input-reading')" class="btn-premium-select">1文字ずつ選んで名前を作る</button>
+                <button onclick="alert('パーツを選んだ後に自動開放されます')" class="btn-premium-select opacity-30">完成した名前から選ぶ（未実装）</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="scr-input-reading" class="screen">
+        <div class="glass-card p-8 rounded-[50px] w-full max-w-sm text-center mt-10 shadow-2xl mx-auto">
+            <p class="label-mini mb-4">性別を選択</p>
+            <div class="flex justify-center gap-2 mb-10">
+                <button id="btn-male" onclick="setGender('male')" class="btn-gender text-[11px]">男の子</button>
+                <button id="btn-female" onclick="setGender('female')" class="btn-gender text-[11px]">女の子</button>
+                <button id="btn-neutral" onclick="setGender('neutral')" class="btn-gender active-gender text-[11px]">指定なし</button>
+            </div>
+            
+            <p class="label-mini mb-4">名前の読み（ひらがな）</p>
+            <input type="text" id="in-name" placeholder="なだい" class="premium-input mb-8">
+            
+            <div class="rule-box text-left space-y-4 mb-10 px-4">
+                <div class="rule-item flex items-center gap-3 cursor-pointer" onclick="setRule('strict')">
+                    <div id="btn-strict" class="dot-selector active"></div>
+                    <div>
+                        <span class="text-sm font-bold text-[#5d5444]">厳格モード（読み一致）</span>
+                        <p class="text-[10px] text-[#a6967a] mt-1">読みが完全一致する漢字のみ表示</p>
+                    </div>
+                </div>
+                <div class="rule-item flex items-center gap-3 cursor-pointer" onclick="setRule('lax')">
+                    <div id="btn-lax" class="dot-selector"></div>
+                    <div>
+                        <span class="text-sm font-bold text-[#5d5444]">柔軟モード（ぶった切り）</span>
+                        <p class="text-[10px] text-[#a6967a] mt-1">読みの一部が一致すれば表示</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="calcSegments()" class="btn-gold py-5 shadow-lg">分け方の提案へ</button>
+        </div>
+    </div>
+
+    <div id="scr-segment" class="screen">
+        <div class="w-full max-w-sm text-center pt-10 mx-auto px-6">
+            <h2 class="text-2xl font-bold mb-4 text-[#8b7e66]">どの分け方にする？</h2>
+            <p class="text-[11px] text-[#bca37f] mb-10 uppercase tracking-widest">Available Segments</p>
+            <div id="seg-options" class="space-y-4 mb-10"></div>
+            <button onclick="changeScreen('scr-input-reading')" class="text-sm text-[#bca37f] font-bold border-b border-[#bca37f] pb-1 hover:text-[#8b7e66] transition-colors">← 読み入力に戻る</button>
+        </div>
+    </div>
+
+    <div id="scr-surname-settings" class="screen">
+        <div class="glass-card p-10 rounded-[60px] w-full max-w-sm text-center mt-10 shadow-2xl mx-auto">
+            <p class="label-mini mb-4">名字を入力（任意）</p>
+            <input type="text" id="in-surname" placeholder="例：山田" class="premium-input mb-10" onchange="updateSurnameData()">
+            
+            <div class="rule-box text-left space-y-6 mb-12 px-4">
+                <p class="text-[11px] font-black text-[#bca37f] uppercase tracking-widest mb-2">姓名判断設定</p>
+                <div class="rule-item flex items-center gap-4 cursor-pointer" onclick="toggleFortunePriority()">
+                    <div id="btn-fortune" class="dot-selector"></div>
+                    <div>
+                        <span class="font-bold text-sm text-[#5d5444]">姓名判断を重視する</span>
+                        <p class="text-[10px] text-[#a6967a] mt-1">相性の良い画数を優先表示</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="startSwiping()" class="btn-gold py-5 shadow-xl">スワイプ開始 →</button>
+        </div>
+    </div>
+
+    <div id="scr-main" class="screen">
+        <div class="hud-top-mini"><span id="pos-indicator" class="slot-name-mini">---</span></div>
+        
+        <div id="stack-container" class="relative w-80 h-[520px] mt-10 mx-auto">
+            <div id="badge-like" class="stamp-premium">LIKE</div>
+            <div id="badge-nope" class="stamp-premium">NOPE</div>
+            <div id="badge-super" class="stamp-premium">SUPER</div>
+            <div id="stack" class="w-full h-full"></div>
+        </div>
+
+        <div class="fixed bottom-[110px] left-0 w-full flex justify-center gap-10 z-[1500] pointer-events-none">
+            <button onclick="manual('left')" class="btn-circle text-[#f28b82] pointer-events-auto" aria-label="却下">✕</button>
+            <button onclick="manual('up')" class="btn-circle text-[#8ab4f8] pointer-events-auto" aria-label="超いいね">★</button>
+            <button onclick="manual('right')" class="btn-circle text-[#81c995] pointer-events-auto" aria-label="いいね">♥</button>
+        </div>
+        
+        <div class="h-40"></div>
+    </div>
+
+    <div id="scr-stock" class="screen">
+        <div class="w-full max-w-md px-4 pt-10 mx-auto">
+            <h2 class="text-2xl font-bold text-center mb-2 text-[#8b7e66]">ストック</h2>
+            <p class="text-[10px] text-center text-[#bca37f] mb-8 tracking-widest uppercase">Selected Parts</p>
+            <div id="stock-list" class="grid grid-cols-2 gap-4 pb-40"></div>
+        </div>
+    </div>
+
+    <div id="scr-build" class="screen">
+        <div class="w-full max-w-md pt-10 px-4 mx-auto">
+            <h2 class="text-2xl font-bold text-center mb-2 text-[#8b7e66]">DIYビルド</h2>
+            <p class="text-[10px] text-center text-[#bca37f] mb-10 tracking-widest uppercase">Customize & Fortune</p>
+            <div id="build-selection" class="space-y-6 mb-6"></div>
+            <div id="build-result-area" class="pb-40"></div>
+        </div>
+    </div>
+
+    <nav id="bottom-nav" class="hidden">
+        <div class="flex justify-around items-center w-full max-w-[500px] mx-auto px-6">
+            <button onclick="changeScreen('scr-main')" class="nav-item flex flex-col items-center gap-1.5 group outline-none" id="nav-search">
+                <span class="text-2xl transition-transform duration-200">🔍</span>
+                <span class="text-[9px] font-black text-[#a6967a] uppercase tracking-tighter">さがす</span>
+            </button>
+            <button onclick="openStock()" class="nav-item flex flex-col items-center gap-1.5 group outline-none" id="nav-stock">
+                <span class="text-2xl transition-transform duration-200">📋</span>
+                <span class="text-[9px] font-black text-[#a6967a] uppercase tracking-tighter">ストック</span>
+            </button>
+            <button onclick="openBuild()" class="nav-item flex flex-col items-center gap-1.5 group outline-none" id="nav-build">
+                <span class="text-2xl transition-transform duration-200">⚒️</span>
+                <span class="text-[9px] font-black text-[#a6967a] uppercase tracking-tighter">ビルド</span>
+            </button>
+            <button onclick="openSettings()" class="nav-item flex flex-col items-center gap-1.5 group outline-none" id="nav-settings">
+                <span class="text-2xl transition-transform duration-200">⚙️</span>
+                <span class="text-[9px] font-black text-[#a6967a] uppercase tracking-tighter">設定</span>
+            </button>
+        </div>
+    </nav>
+
+    <div id="modal-detail" class="overlay">
+        <div class="detail-sheet" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="closeDetail()">✕</button>
+            <div id="det-kanji" class="text-9xl font-bold text-center mb-6 text-[#5d5444]"></div>
+            <div id="det-strokes" class="text-center text-[#bca37f] font-black mb-8 text-xl"></div>
+            <div class="space-y-8 text-[#7a6f5a]">
+                <div class="border-l-2 border-[#bca37f] pl-4">
+                    <span class="label-mini">読み</span>
+                    <div id="det-readings" class="flex flex-wrap gap-2 mt-1"></div>
+                </div>
+                <div class="border-l-2 border-[#bca37f] pl-4">
+                    <span class="label-mini">意味・成り立ち</span>
+                    <p id="det-meaning" class="mt-1 text-sm leading-relaxed"></p>
+                </div>
+            </div>
+            <button onclick="closeDetail()" class="btn-gold mt-12 py-5 shadow-lg">閉じる</button>
+        </div>
+    </div>
+
+    <div id="modal-choice" class="overlay">
+        <div class="detail-sheet text-center" onclick="event.stopPropagation()">
+            <h2 class="text-3xl font-black mb-4 text-[#8b7e66]">
+                <span id="choice-count-label">10</span> 枚完了！
+            </h2>
+            <p id="choice-message" class="text-sm text-[#7a6f5a] mb-12 leading-relaxed px-4"></p>
+            <div class="space-y-4">
+                <button onclick="closeChoiceAndRefetch()" class="btn-premium-select !mb-0 w-full shadow-md">もっと探す</button>
+                <button id="choice-main-btn" class="btn-gold py-5 shadow-xl">次へ進む →</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-fortune-detail" class="overlay">
+        <div class="detail-sheet overflow-y-auto max-h-[85vh] w-[95%] max-w-md" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="closeFortuneDetail()">✕</button>
+            <h2 id="for-name" class="text-4xl font-black text-center mb-10 text-[#5d5444]"></h2>
+            <div id="for-grid" class="flex flex-col w-full relative"></div>
+            <div id="for-desc" class="space-y-6 text-xs pt-8"></div>
+            <button onclick="closeFortuneDetail()" class="btn-gold mt-12 py-5 shadow-lg">ビルドに戻る</button>
+        </div>
+    </div>
+
+    <div id="modal-origin" class="overlay">
+        <div class="detail-sheet text-center" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="this.closest('.overlay').classList.remove('active')">✕</button>
+            <h2 class="text-xl font-black mb-6 text-[#bca37f] tracking-widest uppercase">Name Origin</h2>
+            <div class="py-8 px-4 bg-[#fdfaf5] rounded-[30px] border border-dashed border-[#d4c5af] mb-10">
+                <p class="text-sm leading-loose text-[#5d5444] font-medium"></p>
+            </div>
+            <button onclick="this.closest('.overlay').classList.remove('active')" class="btn-gold py-5 shadow-lg">閉じる</button>
+        </div>
+    </div>
+
+    <div id="modal-kanji-detail" class="overlay">
+        <div class="detail-sheet max-w-md" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="closeKanjiDetail()">✕</button>
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="detail-kanji" class="text-5xl font-black text-[#5d5444]"></h2>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-xs font-bold text-[#a6967a] mb-2">読み方</h3>
+                    <div id="detail-reading" class="text-sm text-[#5d5444] p-3 bg-[#fdfaf5] rounded-2xl"></div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-[#a6967a] mb-2">意味</h3>
+                    <div id="detail-meaning" class="text-sm text-[#5d5444] p-3 bg-[#fdfaf5] rounded-2xl leading-relaxed"></div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-[#a6967a] mb-2">関連する四字熟語</h3>
+                    <div id="detail-yojijukugo" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-settings" class="overlay">
+        <div class="detail-sheet max-w-md" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="closeSettings()">✕</button>
+            <h2 class="text-2xl font-black text-[#5d5444] mb-6">⚙️ 設定</h2>
+            <div id="settings-content" class="max-h-[60vh] overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <div id="modal-history" class="overlay">
+        <div class="detail-sheet max-w-md" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="closeHistory()">✕</button>
+            <h2 class="text-2xl font-black text-[#5d5444] mb-6">📚 保存済み・履歴</h2>
+            <div id="history-content" class="max-h-[60vh] overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <script src="/js/01-core.js"></script>
+    <script src="/js/02-engine.js"></script>
+    <script src="/js/03-fortune.js"></script>
+    <script src="/js/04-ui-flow.js"></script>
+    <script src="/js/05-ui-render.js"></script>
+    <script src="/js/06-ui-physics.js"></script>
+    <script src="/js/07-build.js"></script>
+    <script src="/js/08-origin.js" type="module"></script>
+    <script src="/js/09-storage.js"></script>
+    <script src="/js/10-choice.js"></script>
+    <script src="/js/11-settings.js"></script>
+    <script src="/js/12-history.js"></script>
+
+</body>
+</html>
