@@ -33,20 +33,49 @@ function renderStock() {
         return;
     }
     
-    // スロット別に表示
+    // 読み仮名別にグループ化
+    const groupedByReading = {};
     segments.forEach((seg, idx) => {
+        if (!groupedByReading[seg]) {
+            groupedByReading[seg] = [];
+        }
         const items = liked.filter(item => item.slot === idx);
+        groupedByReading[seg].push(...items);
+    });
+    
+    // 各読み仮名ごとに表示
+    Object.keys(groupedByReading).forEach(reading => {
+        const items = groupedByReading[reading];
         
         if (items.length > 0) {
+            // グループヘッダー
+            const header = document.createElement('div');
+            header.className = 'col-span-2 mt-6 mb-3';
+            header.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="h-px flex-1 bg-[#d4c5af]"></div>
+                    <span class="text-sm font-black text-[#bca37f] uppercase tracking-widest px-3 py-1 bg-white rounded-full border border-[#d4c5af]">
+                        ${reading} (${items.length}個)
+                    </span>
+                    <div class="h-px flex-1 bg-[#d4c5af]"></div>
+                </div>
+            `;
+            container.appendChild(header);
+            
+            // カード表示
             items.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'stock-card';
                 card.onclick = () => showDetailByData(item);
                 
+                const slotInfo = segments.findIndex(seg => 
+                    liked.filter(i => i.slot === segments.indexOf(seg) && i['漢字'] === item['漢字']).length > 0
+                );
+                
                 card.innerHTML = `
                     <div class="stock-kanji">${item['漢字']}</div>
                     <div class="text-xs text-[#bca37f] font-bold mt-2">${item['画数']}画</div>
-                    <div class="text-[10px] text-[#a6967a] mt-1">${idx + 1}文字目: ${seg}</div>
+                    <div class="text-[10px] text-[#a6967a] mt-1">${slotInfo + 1}文字目</div>
                     ${item.isSuper ? '<div class="text-[#8ab4f8] text-2xl mt-2">★</div>' : ''}
                 `;
                 container.appendChild(card);
@@ -140,7 +169,7 @@ function renderBuildSelection() {
     // 運勢ランキングボタン（漢字選択エリアの下に配置）
     if (surnameData && surnameData.length > 0) {
         const rankingBtn = document.createElement('button');
-        rankingBtn.className = 'w-full mt-8 mb-6 py-5 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-black rounded-[30px] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 text-lg';
+        rankingBtn.className = 'w-full mt-8 mb-6 py-5 bg-gradient-to-r from-[#c7b399] to-[#bca37f] text-white font-black rounded-[30px] shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 text-lg';
         rankingBtn.innerHTML = '🏆 運勢ランキングTOP10を見る';
         rankingBtn.onclick = () => showFortuneRanking();
         container.appendChild(rankingBtn);
@@ -556,12 +585,13 @@ function displayFortuneRankingModal(rankedList) {
         const card = document.createElement('div');
         card.className = 'mb-3 p-5 bg-white rounded-3xl border-2 cursor-pointer hover:shadow-xl transition-all active:scale-98';
         
+        // 落ち着いた色に変更
         if (index === 0) {
-            card.classList.add('border-amber-500', 'bg-gradient-to-br', 'from-amber-50', 'to-yellow-50');
+            card.classList.add('border-[#bca37f]', 'bg-gradient-to-br', 'from-[#fdfaf5]', 'to-[#f8f5ef]');
         } else if (index === 1) {
-            card.classList.add('border-gray-400', 'bg-gradient-to-br', 'from-gray-50', 'to-slate-50');
+            card.classList.add('border-[#d4c5af]', 'bg-gradient-to-br', 'from-[#fdfaf5]', 'to-white');
         } else if (index === 2) {
-            card.classList.add('border-orange-400', 'bg-gradient-to-br', 'from-orange-50', 'to-amber-50');
+            card.classList.add('border-[#e5dfd5]', 'bg-gradient-to-br', 'from-white', 'to-[#fdfaf5]');
         } else {
             card.classList.add('border-[#eee5d8]');
         }
@@ -579,10 +609,10 @@ function displayFortuneRankingModal(rankedList) {
                         <div class="text-2xl font-black text-[#5d5444] mb-1">${fullName}</div>
                         <div class="text-xs text-[#a6967a] mb-2">${item.combination.reading}</div>
                         <div class="flex gap-1.5 flex-wrap">
-                            <span class="px-2 py-0.5 bg-white rounded-full text-[10px] font-bold ${f.ten.res.color}">天格:${f.ten.res.label}</span>
-                            <span class="px-2 py-0.5 bg-white rounded-full text-[10px] font-bold ${f.jin.res.color}">人格:${f.jin.res.label}</span>
-                            <span class="px-2 py-0.5 bg-white rounded-full text-[10px] font-bold ${f.chi.res.color}">地格:${f.chi.res.label}</span>
-                            <span class="px-2 py-0.5 bg-white rounded-full text-[10px] font-bold ${f.gai.res.color}">外格:${f.gai.res.label}</span>
+                            <span class="px-2 py-0.5 bg-white rounded-full text-[10px] font-bold ${f.ten.res.color} border border-[#eee5d8]">天:${f.ten.res.label}</span>
+                            <span class="px-2 py-0.5 bg-white rounded-full text-[10px] font-bold ${f.jin.res.color} border border-[#eee5d8]">人:${f.jin.res.label}</span>
+                            <span class="px-2 py-0.5 bg-white rounded-full text-[10px] font-bold ${f.chi.res.color} border border-[#eee5d8]">地:${f.chi.res.label}</span>
+                            <span class="px-2 py-0.5 bg-white rounded-full text-[10px] font-bold ${f.gai.res.color} border border-[#eee5d8]">外:${f.gai.res.label}</span>
                         </div>
                     </div>
                 </div>
