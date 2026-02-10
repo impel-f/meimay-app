@@ -148,3 +148,6 @@ function getWish() {
 }
 
 console.log("ORIGIN: Module loaded (Gemini-powered)");
+
+/* public/js/08-origin.js の一番最後に追加 */
+window.generateOrigin = generateOrigin;
