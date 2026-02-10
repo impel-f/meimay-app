@@ -301,20 +301,31 @@ body {
     -webkit-backdrop-filter: blur(10px);
 }
 
+/* 親要素をグリッド化して4列にする */
+#liked-list-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4列に分割 */
+    gap: 8px; /* カード間の隙間 */
+    padding: 10px;
+}
+
+/* カード自体の調整（サイズを小さく） */
 .stock-card {
     background: white;
-    border-radius: 35px;
-    padding: 26px;
-    margin-bottom: 14px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid rgba(139, 126, 102, 0.1);
+    border-radius: 16px; /* 枠が小さいので丸みも少し抑える */
+    padding: 10px 4px;   /* 上下を少し空けて左右を詰める */
+    margin-bottom: 0;    /* gridのgapを使うので不要 */
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: all 0.3s;
-    cursor: pointer;
+    justify-content: center;
+    aspect-ratio: 1 / 1.1; /* 綺麗な長方形を維持 */
 }
 
+/* 漢字を4列に収まるサイズへ */
+.stock-kanji { 
+    font-size: 24px !important; /* clampを外してサイズを固定 */
+}
 .stock-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-md);
