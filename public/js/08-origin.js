@@ -48,7 +48,7 @@ ${originDetails}
     `.trim();
 
     try {
-        // ★最重要: フルパスではなく、相対パスで叩く。これでVercelのルーティングを外さない。
+        // 相対パスで叩くことでVercelのルーティングを確実に通す
         const response = await fetch('/api/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -60,7 +60,7 @@ ${originDetails}
         const data = await response.json();
         const aiText = data.text || '由来を生成できませんでした。';
 
-        // --- 肉付けポイント：データを更新 ---
+        // --- データを更新して履歴に反映 ---
         currentBuildResult.origin = aiText;
         if (typeof savedNames !== 'undefined') {
             const index = savedNames.findIndex(n => n.fullName === currentBuildResult.fullName);
@@ -114,6 +114,7 @@ function copyOriginToClipboard() {
     }
 }
 
+// グローバル公開
 window.generateOrigin = generateOrigin;
 window.closeOriginModal = closeOriginModal;
 window.copyOriginToClipboard = copyOriginToClipboard;
