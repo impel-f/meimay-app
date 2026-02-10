@@ -1,6 +1,6 @@
 /**
  * ============================================================
- * MODULE 08: NAME ORIGIN GENERATOR (V13.0 - 簡潔モード)
+ * MODULE 08: AI NAME ORIGIN GENERATOR (V13.0 - 簡潔モード)
  * ============================================================
  */
 
@@ -14,9 +14,9 @@ async function generateOrigin() {
     }
 
     const { givenName, combination } = currentBuildResult;
-    console.log(`ORIGIN: 「${givenName}」の由来を簡潔モードで生成します。`);
+    console.log("ORIGIN_START: 簡潔モードで実行します。");
 
-    // モーダルの準備（既存の modal-origin を使用）
+    // モーダルの準備
     const modal = document.getElementById('modal-origin');
     if (!modal) return;
     
@@ -34,13 +34,13 @@ async function generateOrigin() {
         </div>
     `;
 
-    // 漢字の意味データを整理（likedデータから取得）
+    // 漢字の意味データを整理
     const originDetails = combination.map(c => {
         const src = (typeof liked !== 'undefined') ? liked.find(l => l['漢字'] === c['漢字']) : null;
         return `【${c['漢字']}】：${src ? src['意味'] : "良い意味"}`;
     }).join('\n');
 
-    // プロンプト作成（提示された内容を反映）
+    // AIへの命令文
     const prompt = `
 名前「${givenName}」の由来を、以下の漢字データのみを使って、漢字の意味を生かして100文字から150文字程度で簡潔に作成してください。
 
@@ -77,14 +77,14 @@ ${originDetails}
         modal.innerHTML = `
             <div class="detail-sheet flex flex-col items-center text-center">
                 <p class="text-[12px] text-red-700 font-bold mb-8">エラーが発生しました: ${err.message}</p>
-                <button onclick="closeOriginModal()" class="w-full py-5 bg-white border border-[#eee5d8] rounded-[35px] text-[#a6967a] font-black">閉じる</button>
+                <button onclick="closeOriginModal()" class="w-full py-5 bg-white border border-[#eee5d8] rounded-[35px] text-[#a6967a] font-black uppercase tracking-widest">閉じる</button>
             </div>
         `;
     }
 }
 
 /**
- * 結果描画（提示されたモダンなデザイン）
+ * 結果描画（名字を消して名前を強調するデザイン）
  */
 function renderAIOriginResult(givenName, text) {
     const modal = document.getElementById('modal-origin');
