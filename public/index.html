@@ -7,22 +7,16 @@
     <meta name="description" content="赤ちゃんの命名を楽しくサポート。Tinder風スワイプで理想の名前を見つけよう。">
     <title>メイメー - 赤ちゃんの命名アプリ</title>
     
-    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;700;900&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
 
-    <!-- MODE SELECTION SCREEN -->
-    <!-- 履歴ボタン（右上固定） -->
     <button onclick="openHistory()" class="fixed top-6 right-6 z-50 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-2xl hover:scale-110 transition-transform" style="border: 2px solid #eee5d8;">
         📚
     </button>
@@ -39,7 +33,6 @@
         </div>
     </div>
 
-    <!-- INPUT READING SCREEN -->
     <div id="scr-input-reading" class="screen">
         <div class="glass-card p-8 rounded-[50px] w-full max-w-sm text-center mt-10 shadow-2xl mx-auto">
             <p class="label-mini mb-4">性別を選択</p>
@@ -72,7 +65,6 @@
         </div>
     </div>
 
-    <!-- SEGMENT SELECTION SCREEN -->
     <div id="scr-segment" class="screen">
         <div class="w-full max-w-sm text-center pt-10 mx-auto px-6">
             <h2 class="text-2xl font-bold mb-4 text-[#8b7e66]">どの分け方にする？</h2>
@@ -82,7 +74,6 @@
         </div>
     </div>
 
-    <!-- SURNAME SETTINGS SCREEN -->
     <div id="scr-surname-settings" class="screen">
         <div class="glass-card p-10 rounded-[60px] w-full max-w-sm text-center mt-10 shadow-2xl mx-auto">
             <p class="label-mini mb-4">名字を入力（任意）</p>
@@ -102,7 +93,6 @@
         </div>
     </div>
 
-    <!-- MAIN SWIPE SCREEN -->
     <div id="scr-main" class="screen">
         <div class="hud-top-mini"><span id="pos-indicator" class="slot-name-mini">---</span></div>
         
@@ -122,7 +112,6 @@
         <div class="h-40"></div>
     </div>
 
-    <!-- STOCK SCREEN -->
     <div id="scr-stock" class="screen">
         <div class="w-full max-w-md px-4 pt-10 mx-auto">
             <h2 class="text-2xl font-bold text-center mb-2 text-[#8b7e66]">ストック</h2>
@@ -131,7 +120,6 @@
         </div>
     </div>
 
-    <!-- BUILD SCREEN -->
     <div id="scr-build" class="screen">
         <div class="w-full max-w-md pt-10 px-4 mx-auto">
             <h2 class="text-2xl font-bold text-center mb-2 text-[#8b7e66]">DIYビルド</h2>
@@ -141,7 +129,6 @@
         </div>
     </div>
 
-    <!-- BOTTOM NAVIGATION -->
     <nav id="bottom-nav" class="hidden">
         <div class="flex justify-around items-center w-full max-w-[500px] mx-auto px-6">
             <button onclick="changeScreen('scr-main')" class="nav-item flex flex-col items-center gap-1.5 group outline-none" id="nav-search">
@@ -155,16 +142,14 @@
             <button onclick="openBuild()" class="nav-item flex flex-col items-center gap-1.5 group outline-none" id="nav-build">
                 <span class="text-2xl transition-transform duration-200">⚒️</span>
                 <span class="text-[9px] font-black text-[#a6967a] uppercase tracking-tighter">ビルド</span>
+            </button>
             <button onclick="openSettings()" class="nav-item flex flex-col items-center gap-1.5 group outline-none" id="nav-settings">
                 <span class="text-2xl transition-transform duration-200">⚙️</span>
                 <span class="text-[9px] font-black text-[#a6967a] uppercase tracking-tighter">設定</span>
             </button>
-            </button>
         </div>
     </nav>
 
-    <!-- MODALS -->
-    <!-- Detail Modal -->
     <div id="modal-detail" class="overlay">
         <div class="detail-sheet" onclick="event.stopPropagation()">
             <button class="modal-close-btn" onclick="closeDetail()">✕</button>
@@ -184,7 +169,6 @@
         </div>
     </div>
 
-    <!-- Choice Modal -->
     <div id="modal-choice" class="overlay">
         <div class="detail-sheet text-center" onclick="event.stopPropagation()">
             <h2 class="text-3xl font-black mb-4 text-[#8b7e66]">
@@ -198,7 +182,6 @@
         </div>
     </div>
 
-    <!-- Fortune Detail Modal -->
     <div id="modal-fortune-detail" class="overlay">
         <div class="detail-sheet overflow-y-auto max-h-[85vh] w-[95%] max-w-md" onclick="event.stopPropagation()">
             <button class="modal-close-btn" onclick="closeFortuneDetail()">✕</button>
@@ -209,7 +192,6 @@
         </div>
     </div>
 
-    <!-- Origin Modal -->
     <div id="modal-origin" class="overlay">
         <div class="detail-sheet text-center" onclick="event.stopPropagation()">
             <button class="modal-close-btn" onclick="this.closest('.overlay').classList.remove('active')">✕</button>
@@ -221,7 +203,6 @@
         </div>
     </div>
 
-    <!-- 漢字詳細モーダル -->
     <div id="modal-kanji-detail" class="overlay">
         <div class="detail-sheet max-w-md" onclick="event.stopPropagation()">
             <button class="modal-close-btn" onclick="closeKanjiDetail()">✕</button>
@@ -245,7 +226,6 @@
         </div>
     </div>
 
-    <!-- 設定モーダル -->
     <div id="modal-settings" class="overlay">
         <div class="detail-sheet max-w-md" onclick="event.stopPropagation()">
             <button class="modal-close-btn" onclick="closeSettings()">✕</button>
@@ -254,7 +234,6 @@
         </div>
     </div>
 
-    <!-- 履歴・保存モーダル -->
     <div id="modal-history" class="overlay">
         <div class="detail-sheet max-w-md" onclick="event.stopPropagation()">
             <button class="modal-close-btn" onclick="closeHistory()">✕</button>
@@ -263,7 +242,6 @@
         </div>
     </div>
 
-    <!-- JavaScript Modules (Load Order is Critical) -->
     <script src="/js/01-core.js"></script>
     <script src="/js/02-engine.js"></script>
     <script src="/js/03-fortune.js"></script>
