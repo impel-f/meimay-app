@@ -1,6 +1,6 @@
 /**
  * ============================================================
- * MODULE 08: AI NAME ORIGIN GENERATOR (V13.0 - 簡潔モード)
+ * MODULE 08: AI NAME ORIGIN GENERATOR (V13.0 - 履歴保存強化版)
  * ============================================================
  */
 
@@ -14,9 +14,8 @@ async function generateOrigin() {
     }
 
     const { givenName, combination } = currentBuildResult;
-    console.log("ORIGIN_START: 簡潔モードで実行します。");
+    console.log("ORIGIN_START: 簡潔モードで実行し、結果をデータに統合します。");
 
-    // モーダルの準備
     const modal = document.getElementById('modal-origin');
     if (!modal) return;
     
@@ -40,7 +39,6 @@ async function generateOrigin() {
         return `【${c['漢字']}】：${src ? src['意味'] : "良い意味"}`;
     }).join('\n');
 
-    // AIへの命令文
     const prompt = `
 名前「${givenName}」の由来を、以下の漢字データのみを使って、漢字の意味を生かして100文字から150文字程度で簡潔に作成してください。
 
@@ -64,10 +62,25 @@ ${originDetails}
             body: JSON.stringify({ prompt: prompt })
         });
 
-        if (!response.ok) throw new Error('AI生成に失敗しました');
+        if (!response.ok) throw new Error(`AI疎通エラー (Status: ${response.status})`);
 
         const data = await response.json();
         const aiText = data.text || '由来を生成できませんでした。';
+
+        // --- 肉付けポイント：データを更新 ---
+        // 1. 現在のビルド結果に由来を書き込む
+        currentBuildResult.origin = aiText;
+
+        // 2. もし既に保存済みの名前リストに同じフルネームがあれば、そちらの由来も更新する
+        if (typeof savedNames !== 'undefined') {
+            const index = savedNames.findIndex(n => n.fullName === currentBuildResult.fullName);
+            if (index !== -1) {
+                savedNames[index].origin = aiText;
+                // ローカルストレージに即時保存 (Module 09の機能)
+                if (typeof StorageBox !== 'undefined') StorageBox.saveSavedNames();
+                console.log("ORIGIN: 保存済みデータの由来を更新しました。");
+            }
+        }
 
         // 結果の描画
         renderAIOriginResult(givenName, aiText);
@@ -84,7 +97,7 @@ ${originDetails}
 }
 
 /**
- * 結果描画（名字を消して名前を強調するデザイン）
+ * 結果描画（モダンデザイン + 保存済みへの反映）
  */
 function renderAIOriginResult(givenName, text) {
     const modal = document.getElementById('modal-origin');
@@ -101,7 +114,7 @@ function renderAIOriginResult(givenName, text) {
             </div>
 
             <div class="flex flex-col gap-3 w-full">
-                <button onclick="copyOriginToClipboard()" class="w-full py-5 bg-[#5d5444] text-white rounded-[35px] font-black uppercase tracking-widest">📋 由来をコピー</button>
+                <button onclick="copyOriginToClipboard()" class="w-full py-5 bg-[#5d5444] text-white rounded-[35px] font-black uppercase tracking-widest active:scale-95 transition-transform">📋 由来をコピー</button>
                 <button onclick="closeOriginModal()" class="w-full py-5 bg-white border border-[#eee5d8] rounded-[35px] text-[#a6967a] font-black uppercase tracking-widest">閉じる</button>
             </div>
         </div>
@@ -116,11 +129,14 @@ function closeOriginModal() {
 function copyOriginToClipboard() {
     const p = document.querySelector('#modal-origin p');
     if (p) {
-        navigator.clipboard.writeText(p.innerText.trim()).then(() => alert("由来をコピーしました。"));
+        navigator.clipboard.writeText(p.innerText.trim()).then(() => {
+            // トースト通知のような簡易的なフィードバック
+            alert("由来をコピーしました。そのままSNSやメモに貼り付けられます。");
+        });
     }
 }
 
-// グローバルに公開（HTMLのonclickから呼べるようにする）
+// グローバルに公開
 window.generateOrigin = generateOrigin;
 window.closeOriginModal = closeOriginModal;
 window.copyOriginToClipboard = copyOriginToClipboard;
