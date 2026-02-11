@@ -200,6 +200,11 @@ function closeReadingModal() {
 function changeReading() {
     closeReadingModal();
     
+    // ビルド画面をリセット
+    if (typeof clearBuildSelection === 'function') {
+        clearBuildSelection();
+    }
+    
     // 読み方入力画面に戻る
     changeScreen('scr-input-reading');
 }
