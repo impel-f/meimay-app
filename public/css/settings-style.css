@@ -1,0 +1,451 @@
+/* ============================================================
+   設定画面のスタイル（カード型デザイン）
+   ============================================================ */
+
+/* カード型設定画面 */
+.settings-cards {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid #f8f5ef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.settings-card:active {
+    transform: scale(0.98);
+    background: #fdfaf5;
+}
+
+.card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #5d5444;
+    margin-bottom: 4px;
+}
+
+.card-value {
+    font-size: 14px;
+    color: #a6967a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.card-arrow {
+    font-size: 28px;
+    color: #d4c5af;
+    font-weight: 300;
+    flex-shrink: 0;
+}
+
+.settings-divider {
+    height: 1px;
+    background: #eee5d8;
+    margin: 12px 0;
+}
+
+.settings-close-btn {
+    margin-top: 20px;
+}
+
+/* 入力画面（フルスクリーン） */
+.input-screen-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fdfaf5;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-screen-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee5d8;
+    background: white;
+}
+
+.input-screen-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #5d5444;
+}
+
+.back-btn {
+    font-size: 18px;
+    color: #bca37f;
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.back-btn:active {
+    opacity: 0.6;
+}
+
+.input-screen-content {
+    flex: 1;
+    padding: 32px 20px;
+    overflow-y: auto;
+}
+
+.input-screen-footer {
+    padding: 20px;
+    border-top: 1px solid #eee5d8;
+    background: white;
+}
+
+/* 入力セクション */
+.input-section {
+    margin-bottom: 32px;
+}
+
+.input-label {
+    display: block;
+    font-size: 14px;
+    color: #a6967a;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.large-input {
+    width: 100%;
+    font-size: 48px;
+    font-weight: 700;
+    color: #5d5444;
+    border: none;
+    background: transparent;
+    padding: 8px 0;
+    font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    outline: none;
+}
+
+.large-input::placeholder {
+    color: #d4c5af;
+}
+
+.input-underline {
+    height: 2px;
+    background: #d4c5af;
+    margin-top: 8px;
+}
+
+.input-hint {
+    font-size: 13px;
+    color: #a6967a;
+    margin-top: 12px;
+}
+
+.input-description {
+    font-size: 14px;
+    color: #7a6f5a;
+    text-align: center;
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+/* ピルボタン（性別選択） */
+.pill-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pill-btn {
+    padding: 20px 32px;
+    border: 3px solid #eee5d8;
+    border-radius: 50px;
+    background: white;
+    font-size: 18px;
+    font-weight: 700;
+    color: #7a6f5a;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.pill-btn:active {
+    transform: scale(0.98);
+}
+
+.pill-btn.active {
+    background: #bca37f;
+    border-color: #bca37f;
+    color: white;
+}
+
+/* ラジオオプション（厳密さ選択） */
+.radio-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    border: 2px solid #eee5d8;
+    border-radius: 16px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.radio-option:active {
+    transform: scale(0.98);
+}
+
+.radio-option.active {
+    border-color: #bca37f;
+    background: #fdfaf5;
+}
+
+.radio-option input[type="radio"] {
+    width: 24px;
+    height: 24px;
+    margin-top: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.radio-content {
+    flex: 1;
+}
+
+.radio-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #5d5444;
+    margin-bottom: 6px;
+}
+
+.radio-desc {
+    font-size: 13px;
+    color: #a6967a;
+    line-height: 1.5;
+}
+
+/* イメージタグ選択 */
+.tag-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 0 20px;
+}
+
+.tag-button {
+    padding: 16px 12px;
+    border: 2px solid;
+    border-radius: 16px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    font-weight: 600;
+}
+
+.tag-button:active {
+    transform: scale(0.95);
+}
+
+.tag-button.selected {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tag-icon {
+    font-size: 28px;
+}
+
+.tag-label {
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.3;
+}
+
+.tag-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 16px;
+}
+
+/* モーダルの閉じるボタン */
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f8f5ef;
+    border: none;
+    color: #a6967a;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.modal-close-btn:hover {
+    background: #eee5d8;
+    color: #5d5444;
+}
+
+.modal-close-btn:active {
+    transform: scale(0.9);
+}
+
+/* 詳細シートのスクロール対応 */
+.detail-sheet {
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.detail-sheet.max-w-md {
+    max-width: 480px;
+}
+
+.detail-sheet.max-h-\[80vh\] {
+    max-height: 80vh;
+}
+
+/* スクロールバーのスタイル */
+.detail-sheet::-webkit-scrollbar {
+    width: 6px;
+}
+
+.detail-sheet::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.detail-sheet::-webkit-scrollbar-thumb {
+    background: #d4c5af;
+    border-radius: 3px;
+}
+
+.detail-sheet::-webkit-scrollbar-thumb:hover {
+    background: #bca37f;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 480px) {
+    .settings-card {
+        padding: 16px;
+    }
+    
+    .card-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+    }
+    
+    .large-input {
+        font-size: 36px;
+    }
+    
+    .tag-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .tag-button {
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 14px 16px;
+    }
+    
+    .tag-icon {
+        font-size: 24px;
+    }
+    
+    .tag-label {
+        font-size: 14px;
+        text-align: left;
+        flex: 1;
+    }
+}
+
+/* ユーティリティクラス */
+.w-full {
+    width: 100%;
+}
+
+.py-4 {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.py-5 {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+}
+
+.text-lg {
+    font-size: 1.125rem;
+}
+
+.space-y-3 > * + * {
+    margin-top: 0.75rem;
+}
+
+.mt-6 {
+    margin-top: 1.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+.text-center {
+    text-align: center;
+}
