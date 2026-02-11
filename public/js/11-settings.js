@@ -1,50 +1,44 @@
 /* ============================================================
-   MODULE 11: SETTINGS (V5.0 - 統一テイスト)
-   設定画面
+   MODULE 11: SETTINGS (V6.0 - 別画面版)
+   設定画面（ストック・ビルドと同レベル）
    ============================================================ */
 
 // イメージタグの定義
 const IMAGE_TAGS = [
-    { id: 'none', label: 'こだわらない', icon: '✨', color: '#d4c5af' },
-    { id: 'nature', label: '自然・植物', icon: '🌿', color: '#4ade80' },
-    { id: 'brightness', label: '明るさ・太陽', icon: '☀️', color: '#fbbf24' },
-    { id: 'water', label: '水・海', icon: '🌊', color: '#60a5fa' },
-    { id: 'strength', label: '力強さ', icon: '💪', color: '#f87171' },
-    { id: 'kindness', label: '優しさ・愛', icon: '💗', color: '#f472b6' },
-    { id: 'intelligence', label: '知性・賢さ', icon: '📚', color: '#8b5cf6' },
-    { id: 'honesty', label: '誠実・真面目', icon: '🎯', color: '#3b82f6' },
-    { id: 'elegance', label: '品格・気品', icon: '👑', color: '#a78bfa' },
-    { id: 'tradition', label: '伝統・古風', icon: '🎎', color: '#d97706' },
-    { id: 'beauty', label: '美しさ', icon: '✨', color: '#ec4899' },
-    { id: 'success', label: '成功・向上', icon: '🚀', color: '#10b981' },
-    { id: 'peace', label: '安定・平和', icon: '☮️', color: '#6366f1' },
-    { id: 'leadership', label: 'リーダー性', icon: '⭐', color: '#f59e0b' },
-    { id: 'hope', label: '希望・未来', icon: '🌈', color: '#14b8a6' },
-    { id: 'spirituality', label: '精神性', icon: '🕊️', color: '#8b7e66' }
+    { id: 'none', label: 'こだわらない', icon: '✨' },
+    { id: 'nature', label: '自然・植物', icon: '🌿' },
+    { id: 'brightness', label: '明るさ・太陽', icon: '☀️' },
+    { id: 'water', label: '水・海', icon: '🌊' },
+    { id: 'strength', label: '力強さ', icon: '💪' },
+    { id: 'kindness', label: '優しさ・愛', icon: '💗' },
+    { id: 'intelligence', label: '知性・賢さ', icon: '📚' },
+    { id: 'honesty', label: '誠実・真面目', icon: '🎯' },
+    { id: 'elegance', label: '品格・気品', icon: '👑' },
+    { id: 'tradition', label: '伝統・古風', icon: '🎎' },
+    { id: 'beauty', label: '美しさ', icon: '✨' },
+    { id: 'success', label: '成功・向上', icon: '🚀' },
+    { id: 'peace', label: '安定・平和', icon: '☮️' },
+    { id: 'leadership', label: 'リーダー性', icon: '⭐' },
+    { id: 'hope', label: '希望・未来', icon: '🌈' },
+    { id: 'spirituality', label: '精神性', icon: '🕊️' }
 ];
 
 // グローバル変数
 let selectedImageTags = ['none'];
 
 /**
- * 設定画面を開く
+ * 設定画面を開く（別画面として）
  */
 function openSettings() {
-    const modal = document.getElementById('modal-settings');
-    if (!modal) {
-        console.error("SETTINGS: Modal not found");
-        return;
-    }
-    
-    renderSettingsUnified();
-    modal.classList.add('active');
+    renderSettingsScreen();
+    changeScreen('scr-settings');
 }
 
 /**
- * 統一テイスト設定画面のレンダリング
+ * 設定画面のレンダリング
  */
-function renderSettingsUnified() {
-    const container = document.getElementById('settings-content');
+function renderSettingsScreen() {
+    const container = document.getElementById('settings-screen-content');
     if (!container) return;
     
     const genderText = gender === 'male' ? '男の子' : 
@@ -57,8 +51,23 @@ function renderSettingsUnified() {
     const strictText = rule === 'strict' ? '厳格' : '柔軟';
     const fortuneText = prioritizeFortune ? '重視する' : '参考程度';
     
+    const currentReading = segments.join('') || '未設定';
+    
     container.innerHTML = `
-        <div class="settings-unified">
+        <div class="settings-screen-content">
+            <!-- 読み方（最上部） -->
+            <div class="settings-item-unified" onclick="editReadingFull()">
+                <div class="item-icon-circle" style="background: #eff6ff;">
+                    <span style="color: #60a5fa;">あ</span>
+                </div>
+                <div class="item-content-unified">
+                    <div class="item-title-unified">読み方</div>
+                    <div class="item-value-unified">${currentReading}</div>
+                </div>
+                <div class="item-arrow-unified">›</div>
+            </div>
+            
+            <!-- 苗字 -->
             <div class="settings-item-unified" onclick="openSurnameInput()">
                 <div class="item-icon-circle" style="background: #fef2f2;">
                     <span style="color: #f87171;">👤</span>
@@ -70,6 +79,7 @@ function renderSettingsUnified() {
                 <div class="item-arrow-unified">›</div>
             </div>
             
+            <!-- 性別 -->
             <div class="settings-item-unified" onclick="openGenderInput()">
                 <div class="item-icon-circle" style="background: #f0fdf4;">
                     <span style="color: #4ade80;">👶</span>
@@ -81,6 +91,7 @@ function renderSettingsUnified() {
                 <div class="item-arrow-unified">›</div>
             </div>
             
+            <!-- イメージ -->
             <div class="settings-item-unified" onclick="editImageTags()">
                 <div class="item-icon-circle" style="background: #fef9c3;">
                     <span style="color: #facc15;">🎨</span>
@@ -92,17 +103,7 @@ function renderSettingsUnified() {
                 <div class="item-arrow-unified">›</div>
             </div>
             
-            <div class="settings-item-unified" onclick="openReadingInput()">
-                <div class="item-icon-circle" style="background: #eff6ff;">
-                    <span style="color: #60a5fa;">あ</span>
-                </div>
-                <div class="item-content-unified">
-                    <div class="item-title-unified">読み方</div>
-                    <div class="item-value-unified">${segments.join('') || '未設定'}</div>
-                </div>
-                <div class="item-arrow-unified">›</div>
-            </div>
-            
+            <!-- 読みの厳密さ -->
             <div class="settings-item-unified" onclick="openReadingStyleInput()">
                 <div class="item-icon-circle" style="background: #f5f3ff;">
                     <span style="color: #a78bfa;">🔍</span>
@@ -114,6 +115,7 @@ function renderSettingsUnified() {
                 <div class="item-arrow-unified">›</div>
             </div>
             
+            <!-- 姓名判断 -->
             <div class="settings-item-unified" onclick="editFortunePriority()">
                 <div class="item-icon-circle" style="background: #fef3c7;">
                     <span style="color: #f59e0b;">⭐</span>
@@ -127,6 +129,18 @@ function renderSettingsUnified() {
             
             <div class="settings-divider-unified"></div>
             
+            <!-- 履歴・保存済み -->
+            <div class="settings-item-unified" onclick="openHistory()">
+                <div class="item-icon-circle" style="background: #fef3f2;">
+                    <span style="color: #f97316;">📚</span>
+                </div>
+                <div class="item-content-unified">
+                    <div class="item-title-unified">履歴・保存済み</div>
+                </div>
+                <div class="item-arrow-unified">›</div>
+            </div>
+            
+            <!-- 使い方ガイド -->
             <div class="settings-item-unified" onclick="showGuide()">
                 <div class="item-icon-circle" style="background: #f0f9ff;">
                     <span style="color: #0ea5e9;">📖</span>
@@ -137,20 +151,63 @@ function renderSettingsUnified() {
                 <div class="item-arrow-unified">›</div>
             </div>
             
-            <div class="settings-close-area">
-                <button onclick="closeSettings()" class="btn-close-settings">
-                    閉じる
-                </button>
+            <!-- モードを変える -->
+            <div class="settings-item-unified" onclick="resetToTop()">
+                <div class="item-icon-circle" style="background: #faf5ff;">
+                    <span style="color: #a855f7;">🔄</span>
+                </div>
+                <div class="item-content-unified">
+                    <div class="item-title-unified">モードを変える</div>
+                    <div class="item-value-unified">最初から選び直す</div>
+                </div>
+                <div class="item-arrow-unified">›</div>
             </div>
         </div>
     `;
 }
 
 /**
- * 苗字入力画面
+ * 読み方編集（現在の読み表示 + 変更ボタン）
+ */
+function editReadingFull() {
+    const currentReading = segments.join('') || '未設定';
+    
+    const modal = `
+        <div class="overlay active modal-overlay-dark" id="reading-modal" onclick="if(event.target.id==='reading-modal')closeReadingModal()">
+            <div class="modal-sheet" onclick="event.stopPropagation()">
+                <button class="modal-close-x" onclick="closeReadingModal()">✕</button>
+                <h3 class="modal-title">読み方</h3>
+                <div class="modal-body">
+                    <div class="current-reading-display">
+                        <div class="current-reading-label">現在の読み方</div>
+                        <div class="current-reading-value">${currentReading}</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="changeReading()" class="btn-modal-primary">変更する</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modal);
+}
+
+function closeReadingModal() {
+    document.getElementById('reading-modal')?.remove();
+}
+
+function changeReading() {
+    closeReadingModal();
+    
+    // 読み方入力画面に戻る
+    changeScreen('scr-input-reading');
+}
+
+/**
+ * 苗字入力
  */
 function openSurnameInput() {
-    closeSettings();
     showInputModal('苗字を入力', 'text', surnameStr, '', (value) => {
         if (value) {
             surnameStr = value;
@@ -162,15 +219,15 @@ function openSurnameInput() {
                 }
             }
             saveSettings();
+            renderSettingsScreen();
         }
     });
 }
 
 /**
- * 性別入力画面
+ * 性別選択
  */
 function openGenderInput() {
-    closeSettings();
     showChoiceModal('性別を選択', '選んだ性別に合う漢字が優先表示されます', [
         { label: '男の子', value: 'male' },
         { label: '女の子', value: 'female' },
@@ -178,38 +235,21 @@ function openGenderInput() {
     ], gender, (value) => {
         gender = value;
         saveSettings();
+        renderSettingsScreen();
     });
 }
 
 /**
- * 読み方入力画面（設定内で完結）
- */
-function openReadingInput() {
-    closeSettings();
-    showInputModal('読み方を入力', 'text', segments.join(''), 'ひらがなで入力（例：はると）', (value) => {
-        if (value) {
-            // ここで calcSegments を呼ばずに、シンプルに保存
-            // 実際の分割は後でスワイプ開始時に行う
-            const tempInput = document.getElementById('in-name');
-            if (tempInput) {
-                tempInput.value = value;
-            }
-            saveSettings();
-        }
-    });
-}
-
-/**
- * 読みの厳密さ入力画面
+ * 読みの厳密さ
  */
 function openReadingStyleInput() {
-    closeSettings();
     showChoiceModal('読みの厳密さ', '', [
         { label: '厳格モード（読み一致）', value: 'strict', desc: '読みが完全一致する漢字のみ表示' },
         { label: '柔軟モード（ぶった切り）', value: 'flexible', desc: '読みの一部が一致すれば表示' }
     ], rule, (value) => {
         rule = value;
         saveSettings();
+        renderSettingsScreen();
     });
 }
 
@@ -217,14 +257,11 @@ function openReadingStyleInput() {
  * イメージタグ編集
  */
 function editImageTags() {
-    closeSettings();
-    
     const tagsHTML = IMAGE_TAGS.map(tag => {
         const isSelected = selectedImageTags.includes(tag.id);
         return `
             <button onclick="toggleImageTag('${tag.id}')" 
-                    class="tag-button ${isSelected ? 'selected' : ''}"
-                    style="border-color: ${tag.color}; ${isSelected ? `background: ${tag.color}; color: white;` : `color: ${tag.color};`}">
+                    class="tag-button-unified ${isSelected ? 'selected' : ''}">
                 <span class="tag-icon">${tag.icon}</span>
                 <span class="tag-label">${tag.label}</span>
                 ${isSelected ? '<span class="tag-check">✓</span>' : ''}
@@ -269,26 +306,41 @@ function toggleImageTag(tagId) {
 function saveImageTags() {
     document.getElementById('tag-selector')?.remove();
     saveSettings();
-    openSettings();
+    renderSettingsScreen();
 }
 
 function cancelTagSelection() {
     document.getElementById('tag-selector')?.remove();
-    openSettings();
 }
 
 /**
- * 姓名判断優先度編集
+ * 姓名判断優先度
  */
 function editFortunePriority() {
-    closeSettings();
     showChoiceModal('姓名判断', '', [
         { label: '重視する', value: true, desc: '良い運勢の組み合わせを優先表示' },
         { label: '参考程度', value: false, desc: '運勢も表示するが、並び順に影響しない' }
     ], prioritizeFortune, (value) => {
         prioritizeFortune = value;
         saveSettings();
+        renderSettingsScreen();
     });
+}
+
+/**
+ * モードを変える（TOP画面に戻る）
+ */
+function resetToTop() {
+    if (confirm('最初の画面に戻りますか？\n現在のストックは保持されます。')) {
+        changeScreen('scr-mode');
+    }
+}
+
+/**
+ * 使い方ガイド
+ */
+function showGuide() {
+    alert('使い方ガイドは今後実装予定です');
 }
 
 /**
@@ -296,7 +348,7 @@ function editFortunePriority() {
  */
 function showInputModal(title, type, currentValue, placeholder, onSave) {
     const modal = `
-        <div class="overlay active modal-overlay-dark" id="input-modal">
+        <div class="overlay active modal-overlay-dark" id="input-modal" onclick="if(event.target.id==='input-modal')closeInputModal()">
             <div class="modal-sheet" onclick="event.stopPropagation()">
                 <button class="modal-close-x" onclick="closeInputModal()">✕</button>
                 <h3 class="modal-title">${title}</h3>
@@ -317,7 +369,7 @@ function showInputModal(title, type, currentValue, placeholder, onSave) {
     `;
     
     document.body.insertAdjacentHTML('beforeend', modal);
-    document.getElementById('modal-input')?.focus();
+    setTimeout(() => document.getElementById('modal-input')?.focus(), 100);
     
     window.inputModalCallback = onSave;
 }
@@ -328,7 +380,6 @@ function saveInputModal() {
         window.inputModalCallback(input.value.trim());
     }
     closeInputModal();
-    openSettings();
 }
 
 function closeInputModal() {
@@ -354,7 +405,7 @@ function showChoiceModal(title, description, options, currentValue, onSave) {
     }).join('');
     
     const modal = `
-        <div class="overlay active modal-overlay-dark" id="choice-modal">
+        <div class="overlay active modal-overlay-dark" id="choice-modal" onclick="if(event.target.id==='choice-modal')closeChoiceModal()">
             <div class="modal-sheet" onclick="event.stopPropagation()">
                 <button class="modal-close-x" onclick="closeChoiceModal()">✕</button>
                 <h3 class="modal-title">${title}</h3>
@@ -377,7 +428,6 @@ function showChoiceModal(title, description, options, currentValue, onSave) {
 
 function selectChoiceOption(value) {
     window.choiceModalValue = value;
-    // UI更新
     document.querySelectorAll('.choice-option').forEach(opt => opt.classList.remove('selected'));
     document.querySelectorAll('.choice-radio').forEach(radio => radio.classList.remove('checked'));
     event.target.closest('.choice-option').classList.add('selected');
@@ -389,18 +439,10 @@ function saveChoiceModal() {
         window.choiceModalCallback(window.choiceModalValue);
     }
     closeChoiceModal();
-    openSettings();
 }
 
 function closeChoiceModal() {
     document.getElementById('choice-modal')?.remove();
-}
-
-/**
- * 使い方ガイド
- */
-function showGuide() {
-    alert('使い方ガイドは今後実装予定です');
 }
 
 /**
@@ -440,14 +482,6 @@ function loadSettings() {
     }
 }
 
-/**
- * 設定画面を閉じる
- */
-function closeSettings() {
-    const modal = document.getElementById('modal-settings');
-    if (modal) modal.classList.remove('active');
-}
-
 loadSettings();
 
-console.log("SETTINGS: Module loaded (v5.0 - Unified Design)");
+console.log("SETTINGS: Module loaded (v6.0 - Separate Screen)");
