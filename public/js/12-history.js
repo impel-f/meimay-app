@@ -1,16 +1,65 @@
 /* ============================================================
-   MODULE 12: HISTORY (V1.0)
+   MODULE 12: HISTORY (V2.0 - 読み方単位履歴 + メッセージ保存)
    履歴・保存機能
    ============================================================ */
 
 /**
- * 名前を保存
+ * 名前を保存（メッセージ付き）
  */
 function saveName() {
     if (!currentBuildResult || !currentBuildResult.fullName) {
         alert('保存する名前がありません');
         return;
     }
+    
+    // メッセージ入力モーダルを表示
+    showSaveMessageModal();
+}
+
+/**
+ * 保存メッセージ入力モーダル
+ */
+function showSaveMessageModal() {
+    const modal = `
+        <div class="overlay active modal-overlay-dark" id="save-message-modal" onclick="if(event.target.id==='save-message-modal')closeSaveMessageModal()">
+            <div class="modal-sheet" onclick="event.stopPropagation()">
+                <button class="modal-close-x" onclick="closeSaveMessageModal()">✕</button>
+                <h3 class="modal-title">名前を保存</h3>
+                <div class="modal-body">
+                    <div class="text-center mb-6">
+                        <div class="text-3xl font-black text-[#5d5444] mb-2">${currentBuildResult.fullName}</div>
+                        <div class="text-sm text-[#a6967a]">${currentBuildResult.reading}</div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="text-xs font-bold text-[#a6967a] mb-2 block">メモ（任意）</label>
+                        <input type="text" 
+                               id="save-message-input" 
+                               class="w-full px-4 py-3 bg-white border-2 border-[#eee5d8] rounded-2xl text-sm font-medium text-[#5d5444] focus:border-[#bca37f] outline-none transition-all"
+                               placeholder="例：第一候補、祖父の名前から"
+                               maxlength="50">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="executeSaveWithMessage()" class="btn-modal-primary">保存する</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modal);
+    setTimeout(() => document.getElementById('save-message-input')?.focus(), 100);
+}
+
+function closeSaveMessageModal() {
+    document.getElementById('save-message-modal')?.remove();
+}
+
+/**
+ * メッセージ付きで名前を保存
+ */
+function executeSaveWithMessage() {
+    const messageInput = document.getElementById('save-message-input');
+    const message = messageInput ? messageInput.value.trim() : '';
     
     const saved = getSavedNames();
     
@@ -28,8 +77,8 @@ function saveName() {
     // 保存データを作成
     const saveData = {
         ...currentBuildResult,
-        savedAt: new Date().toISOString(),
-        note: ''
+        message: message,
+        savedAt: new Date().toISOString()
     };
     
     saved.unshift(saveData);
@@ -41,41 +90,46 @@ function saveName() {
     
     localStorage.setItem('meimay_saved', JSON.stringify(saved));
     
+    closeSaveMessageModal();
     alert('✨ 名前を保存しました！');
-    console.log('HISTORY: Name saved', saveData);
+    console.log('HISTORY: Name saved with message', saveData);
 }
 
 /**
- * 検索履歴に追加
+ * 読み方単位の履歴に追加
  */
-function addToHistory() {
-    if (!currentBuildResult || !currentBuildResult.fullName) return;
+function addToReadingHistory() {
+    if (!segments || segments.length === 0) return;
     
-    const history = getSearchHistory();
+    const reading = segments.join('');
+    const history = getReadingHistory();
     
     // 重複を削除（最新を優先）
-    const filtered = history.filter(item => item.fullName !== currentBuildResult.fullName);
+    const filtered = history.filter(item => item.reading !== reading);
     
     const historyData = {
-        fullName: currentBuildResult.fullName,
-        reading: currentBuildResult.reading,
-        combination: currentBuildResult.combination,
-        fortune: currentBuildResult.fortune ? {
-            so: currentBuildResult.fortune.so.val,
-            label: currentBuildResult.fortune.so.res.label
-        } : null,
+        reading: reading,
+        segments: [...segments],
+        settings: {
+            gender: gender,
+            rule: rule,
+            imageTags: selectedImageTags || [],
+            prioritizeFortune: prioritizeFortune,
+            surname: surnameStr
+        },
+        likedCount: liked.filter(item => segments[item.slot]).length,
         searchedAt: new Date().toISOString()
     };
     
     filtered.unshift(historyData);
     
-    // 最大100件まで
-    if (filtered.length > 100) {
-        filtered.length = 100;
+    // 最大30件まで
+    if (filtered.length > 30) {
+        filtered.length = 30;
     }
     
-    localStorage.setItem('meimay_history', JSON.stringify(filtered));
-    console.log('HISTORY: Added to history', historyData);
+    localStorage.setItem('meimay_reading_history', JSON.stringify(filtered));
+    console.log('HISTORY: Added reading history', historyData);
 }
 
 /**
@@ -92,14 +146,14 @@ function getSavedNames() {
 }
 
 /**
- * 検索履歴を取得
+ * 読み方履歴を取得
  */
-function getSearchHistory() {
+function getReadingHistory() {
     try {
-        const data = localStorage.getItem('meimay_history');
+        const data = localStorage.getItem('meimay_reading_history');
         return data ? JSON.parse(data) : [];
     } catch (error) {
-        console.error('HISTORY: Failed to load history', error);
+        console.error('HISTORY: Failed to load reading history', error);
         return [];
     }
 }
@@ -119,88 +173,121 @@ function openHistory() {
 }
 
 /**
- * 履歴画面のレンダリング
+ * 履歴画面のレンダリング（タブ切り替え）
  */
 function renderHistory() {
     const container = document.getElementById('history-content');
     if (!container) return;
     
     const saved = getSavedNames();
-    const history = getSearchHistory();
+    const history = getReadingHistory();
     
     container.innerHTML = `
-        <div class="space-y-6">
-            <!-- 保存済み -->
-            <div>
-                <h3 class="text-sm font-black text-[#5d5444] mb-4 flex items-center gap-2">
-                    <span class="text-lg">⭐</span> 保存済み（${saved.length}件）
-                </h3>
-                ${saved.length > 0 ? `
-                    <div class="space-y-3">
-                        ${saved.map((item, index) => `
-                            <div class="bg-white rounded-2xl p-4 border border-[#eee5d8] shadow-sm">
-                                <div class="flex items-start justify-between mb-2">
-                                    <div>
-                                        <div class="text-lg font-black text-[#5d5444]">${item.fullName}</div>
-                                        <div class="text-xs text-[#a6967a]">${item.reading}</div>
-                                    </div>
-                                    ${item.fortune ? `
-                                        <div class="text-right">
-                                            <div class="text-sm font-bold ${item.fortune.so.res?.color || 'text-[#bca37f]'}">${item.fortune.so.val || item.fortune.so}画</div>
-                                            <div class="text-xs ${item.fortune.so.res?.color || 'text-[#bca37f]'}">${item.fortune.so.res?.label || item.fortune.label}</div>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                                <div class="flex gap-2 mt-3">
-                                    <button onclick="loadSavedName(${index})" class="flex-1 py-2 bg-[#fdfaf5] rounded-xl text-xs font-bold text-[#7a6f5a] hover:bg-[#bca37f] hover:text-white transition-all">
-                                        詳細を見る
-                                    </button>
-                                    <button onclick="deleteSavedName(${index})" class="px-4 py-2 bg-[#fef2f2] rounded-xl text-xs font-bold text-[#f28b82] hover:bg-[#f28b82] hover:text-white transition-all">
-                                        削除
-                                    </button>
-                                </div>
+        <!-- タブ -->
+        <div class="flex gap-2 mb-6 border-b-2 border-[#eee5d8]">
+            <button onclick="switchHistoryTab('saved')" id="tab-saved" class="flex-1 py-3 font-bold text-sm transition-all border-b-2 -mb-0.5">
+                保存済み（${saved.length}）
+            </button>
+            <button onclick="switchHistoryTab('history')" id="tab-history" class="flex-1 py-3 font-bold text-sm transition-all border-b-2 -mb-0.5">
+                履歴（${history.length}）
+            </button>
+        </div>
+        
+        <!-- 保存済みタブ -->
+        <div id="content-saved" class="space-y-3">
+            ${saved.length > 0 ? saved.map((item, index) => `
+                <div class="bg-white rounded-2xl p-4 border border-[#eee5d8] shadow-sm">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <div class="text-lg font-black text-[#5d5444]">${item.fullName}</div>
+                            <div class="text-xs text-[#a6967a]">${item.reading}</div>
+                            ${item.message ? `<div class="text-xs text-[#bca37f] mt-1">💬 ${item.message}</div>` : ''}
+                        </div>
+                        ${item.fortune ? `
+                            <div class="text-right ml-3">
+                                <div class="text-sm font-bold ${item.fortune.so.res?.color || 'text-[#bca37f]'}">${item.fortune.so.val || item.fortune.so}画</div>
+                                <div class="text-xs ${item.fortune.so.res?.color || 'text-[#bca37f]'}">${item.fortune.so.res?.label || item.fortune.label}</div>
                             </div>
-                        `).join('')}
+                        ` : ''}
                     </div>
-                ` : `
-                    <div class="text-center py-10 text-sm text-[#a6967a]">
-                        保存された名前はまだありません
+                    <div class="flex gap-2 mt-3">
+                        <button onclick="loadSavedName(${index})" class="flex-1 py-2 bg-[#fdfaf5] rounded-xl text-xs font-bold text-[#7a6f5a] hover:bg-[#bca37f] hover:text-white transition-all">
+                            詳細を見る
+                        </button>
+                        <button onclick="deleteSavedName(${index})" class="px-4 py-2 bg-[#fef2f2] rounded-xl text-xs font-bold text-[#f28b82] hover:bg-[#f28b82] hover:text-white transition-all">
+                            削除
+                        </button>
                     </div>
-                `}
-            </div>
-            
-            <!-- 検索履歴 -->
-            <div>
-                <h3 class="text-sm font-black text-[#5d5444] mb-4 flex items-center gap-2">
-                    <span class="text-lg">🕐</span> 検索履歴（${history.length}件）
-                </h3>
-                ${history.length > 0 ? `
-                    <div class="space-y-2">
-                        ${history.slice(0, 20).map((item, index) => `
-                            <div class="bg-[#fdfaf5] rounded-xl p-3 flex items-center justify-between">
-                                <div>
-                                    <span class="text-sm font-bold text-[#5d5444]">${item.fullName}</span>
-                                    <span class="text-xs text-[#a6967a] ml-2">${item.reading}</span>
-                                </div>
-                                ${item.fortune ? `
-                                    <div class="text-xs ${item.fortune.label === '大吉' ? 'text-amber-600' : 'text-[#bca37f]'} font-bold">
-                                        ${item.fortune.label}
-                                    </div>
-                                ` : ''}
+                </div>
+            `).join('') : `
+                <div class="text-center py-16 text-sm text-[#a6967a]">
+                    保存された名前はまだありません
+                </div>
+            `}
+        </div>
+        
+        <!-- 履歴タブ -->
+        <div id="content-history" class="space-y-3 hidden">
+            ${history.length > 0 ? history.map((item, index) => `
+                <div class="bg-[#fdfaf5] rounded-2xl p-4 border border-[#eee5d8] cursor-pointer hover:shadow-md transition-all" onclick="loadReadingHistory(${index})">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <div class="text-xl font-black text-[#5d5444]">${item.reading}</div>
+                            <div class="text-xs text-[#a6967a] mt-1">
+                                ${item.segments.join(' • ')} 
+                                ${item.settings.gender === 'male' ? '👦' : item.settings.gender === 'female' ? '👧' : ''}
                             </div>
-                        `).join('')}
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs font-bold text-[#bca37f]">${item.likedCount}個</div>
+                            <div class="text-xs text-[#a6967a]">選択済み</div>
+                        </div>
                     </div>
-                    <button onclick="clearHistory()" class="w-full mt-4 py-3 bg-[#fef2f2] rounded-xl text-xs font-bold text-[#f28b82] hover:bg-[#f28b82] hover:text-white transition-all">
-                        履歴をクリア
-                    </button>
-                ` : `
-                    <div class="text-center py-10 text-sm text-[#a6967a]">
-                        検索履歴はまだありません
+                    <div class="text-[10px] text-[#a6967a]">
+                        ${new Date(item.searchedAt).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </div>
-                `}
-            </div>
+                </div>
+            `).join('') : `
+                <div class="text-center py-16 text-sm text-[#a6967a]">
+                    検索履歴はまだありません
+                </div>
+            `}
+            ${history.length > 0 ? `
+                <button onclick="clearReadingHistory()" class="w-full mt-4 py-3 bg-[#fef2f2] rounded-xl text-xs font-bold text-[#f28b82] hover:bg-[#f28b82] hover:text-white transition-all">
+                    履歴をクリア
+                </button>
+            ` : ''}
         </div>
     `;
+    
+    // 保存済みタブを初期選択
+    switchHistoryTab('saved');
+}
+
+/**
+ * タブ切り替え
+ */
+function switchHistoryTab(tab) {
+    const savedTab = document.getElementById('tab-saved');
+    const historyTab = document.getElementById('tab-history');
+    const savedContent = document.getElementById('content-saved');
+    const historyContent = document.getElementById('content-history');
+    
+    if (tab === 'saved') {
+        savedTab.classList.add('text-[#bca37f]', 'border-[#bca37f]');
+        savedTab.classList.remove('text-[#a6967a]', 'border-transparent');
+        historyTab.classList.add('text-[#a6967a]', 'border-transparent');
+        historyTab.classList.remove('text-[#bca37f]', 'border-[#bca37f]');
+        savedContent.classList.remove('hidden');
+        historyContent.classList.add('hidden');
+    } else {
+        historyTab.classList.add('text-[#bca37f]', 'border-[#bca37f]');
+        historyTab.classList.remove('text-[#a6967a]', 'border-transparent');
+        savedTab.classList.add('text-[#a6967a]', 'border-transparent');
+        savedTab.classList.remove('text-[#bca37f]', 'border-[#bca37f]');
+        historyContent.classList.remove('hidden');
+        savedContent.classList.add('hidden');
+    }
 }
 
 /**
@@ -223,6 +310,44 @@ function loadSavedName(index) {
 }
 
 /**
+ * 読み方履歴を読み込んで再開
+ */
+function loadReadingHistory(index) {
+    const history = getReadingHistory();
+    if (index < 0 || index >= history.length) return;
+    
+    const item = history[index];
+    
+    if (!confirm(`「${item.reading}」の検索を再開しますか？\n\n現在の進行状況はリセットされます。`)) {
+        return;
+    }
+    
+    // 設定を復元
+    segments = [...item.segments];
+    gender = item.settings.gender || 'neutral';
+    rule = item.settings.rule || 'flexible';
+    selectedImageTags = item.settings.imageTags || ['none'];
+    prioritizeFortune = item.settings.prioritizeFortune || false;
+    surnameStr = item.settings.surname || '';
+    
+    // ストックと選択状態をクリア
+    liked = [];
+    currentBuildResult = null;
+    
+    // 設定を保存
+    if (typeof saveSettings === 'function') {
+        saveSettings();
+    }
+    
+    closeHistory();
+    
+    // 苗字設定画面に遷移
+    changeScreen('scr-surname-settings');
+    
+    console.log('HISTORY: Loaded reading history', item);
+}
+
+/**
  * 保存済み名前を削除
  */
 function deleteSavedName(index) {
@@ -237,14 +362,14 @@ function deleteSavedName(index) {
 }
 
 /**
- * 検索履歴をクリア
+ * 読み方履歴をクリア
  */
-function clearHistory() {
+function clearReadingHistory() {
     if (!confirm('検索履歴をすべて削除しますか？')) return;
     
-    localStorage.removeItem('meimay_history');
+    localStorage.removeItem('meimay_reading_history');
     renderHistory();
-    console.log('HISTORY: Cleared history');
+    console.log('HISTORY: Cleared reading history');
 }
 
 /**
@@ -255,13 +380,21 @@ function closeHistory() {
     if (modal) modal.classList.remove('active');
 }
 
-// ビルド実行時に自動的に履歴に追加
-const originalExecuteBuild = window.executeBuild;
-if (typeof originalExecuteBuild === 'function') {
-    window.executeBuild = function() {
-        originalExecuteBuild.apply(this, arguments);
-        setTimeout(() => addToHistory(), 500);
+// グローバルに公開
+window.saveName = saveName;
+window.executeSaveWithMessage = executeSaveWithMessage;
+window.closeSaveMessageModal = closeSaveMessageModal;
+window.switchHistoryTab = switchHistoryTab;
+window.loadReadingHistory = loadReadingHistory;
+window.clearReadingHistory = clearReadingHistory;
+
+// スワイプ開始時に読み方履歴を追加
+const originalStartSwiping = window.startSwiping;
+if (typeof originalStartSwiping === 'function') {
+    window.startSwiping = function() {
+        addToReadingHistory();
+        originalStartSwiping.apply(this, arguments);
     };
 }
 
-console.log("HISTORY: Module loaded");
+console.log("HISTORY: Module loaded (v2.0)");
