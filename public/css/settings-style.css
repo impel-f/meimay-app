@@ -407,26 +407,36 @@
 }
 
 
-/* --- プレミアムカード用の設定を末尾に追加 --- */
+/* --- プレミアムグループ（カード）の設定を追加 --- */
 .settings-group {
     background: white;
     border-radius: 30px; /* 他の画面と合わせた大きな角丸 */
-    padding: 8px 20px;
     margin-bottom: 20px;
-    box-shadow: 0 10px 30px rgba(93, 84, 68, 0.08); /* プレミアムな影 */
+    box-shadow: 0 10px 30px rgba(93, 84, 68, 0.06); /* プレミアムな影 */
     border: 1px solid rgba(139, 126, 102, 0.1);
+    overflow: hidden;
+    animation: fadeIn 0.4s ease forwards;
 }
 
-/* カード内の項目調整 */
+/* グループ内の項目は背景と影を消して、区切り線を入れる */
 .settings-group .settings-item-unified {
-    background: transparent !important; /* カード自体が白いため透明に */
-    box-shadow: none !important;        /* 二重の影を消す */
-    border-radius: 0;
-    padding: 20px 0;
-    border-bottom: 1px solid #f8f5f0;
-    cursor: pointer;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border-bottom: 1px solid #fcfaf7;
+    padding: 18px 20px;
 }
 
 .settings-group .settings-item-unified:last-child {
     border-bottom: none;
+}
+
+/* グループのタイトルラベル（任意） */
+.group-label {
+    font-size: 11px;
+    font-weight: 900;
+    color: #bca37f;
+    letter-spacing: 0.1em;
+    padding: 0 0 8px 20px;
+    text-transform: uppercase;
 }
