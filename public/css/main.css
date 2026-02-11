@@ -693,3 +693,9 @@ button {
 .btn-gold, .btn-premium-select {
     font-size: clamp(13px, 3.5vw, 14px) !important;
 }
+
+cat public/css/settings-style.css >> public/css/main.css
+
+git add public/css/main.css
+git commit -m "Fix: settings-style統合"
+git push origin main
