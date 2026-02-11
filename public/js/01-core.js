@@ -114,10 +114,14 @@ function toggleFortunePriority() {
 }
 
 /**
- * 画面遷移
+ * 画面遷移（モーダル自動クローズ付き）
  */
 function changeScreen(id) { 
     console.log(`CORE: Screen transition -> ${id}`);
+    
+    // 開いているモーダルを全て閉じる
+    const modals = document.querySelectorAll('.overlay.active');
+    modals.forEach(m => m.classList.remove('active'));
     
     // 全画面を非表示
     const screens = document.querySelectorAll('.screen');
