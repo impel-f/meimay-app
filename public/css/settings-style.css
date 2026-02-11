@@ -1,13 +1,14 @@
 /* ============================================================
-   設定画面のスタイル（統一テイスト）
+   設定画面のスタイル（V6.0 - 別画面版）
    ============================================================ */
 
-/* 設定画面メインコンテナ */
-.settings-unified {
+/* 設定画面コンテナ */
+.settings-screen-content {
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    padding-bottom: 120px;
 }
 
 /* 設定項目（白いボックス） */
@@ -72,29 +73,6 @@
     margin: 12px 0;
 }
 
-/* 閉じるボタンエリア */
-.settings-close-area {
-    margin-top: 20px;
-}
-
-.btn-close-settings {
-    width: 100%;
-    padding: 16px;
-    background: #bca37f;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-close-settings:active {
-    transform: scale(0.98);
-    opacity: 0.9;
-}
-
 /* ============================================================
    モーダル（統一デザイン）
    ============================================================ */
@@ -132,6 +110,7 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    z-index: 10;
 }
 
 .modal-close-x:active {
@@ -215,6 +194,29 @@
 }
 
 /* ============================================================
+   現在の読み方表示
+   ============================================================ */
+
+.current-reading-display {
+    text-align: center;
+    padding: 32px 20px;
+}
+
+.current-reading-label {
+    font-size: 13px;
+    color: #a6967a;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.current-reading-value {
+    font-size: 48px;
+    font-weight: 800;
+    color: #5d5444;
+    font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+}
+
+/* ============================================================
    選択モーダル
    ============================================================ */
 
@@ -289,7 +291,7 @@
 }
 
 /* ============================================================
-   イメージタググリッド
+   イメージタググリッド（色統一版）
    ============================================================ */
 
 .tag-grid {
@@ -299,9 +301,9 @@
     margin-bottom: 24px;
 }
 
-.tag-button {
+.tag-button-unified {
     padding: 16px 12px;
-    border: 2px solid;
+    border: 2px solid #eee5d8;
     border-radius: 16px;
     background: white;
     display: flex;
@@ -312,13 +314,16 @@
     transition: all 0.2s;
     position: relative;
     font-weight: 600;
+    color: #7a6f5a;
 }
 
-.tag-button:active {
+.tag-button-unified:active {
     transform: scale(0.95);
 }
 
-.tag-button.selected {
+.tag-button-unified.selected {
+    border-color: #bca37f;
+    background: #fdfaf5;
     transform: scale(1.02);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -338,6 +343,7 @@
     top: 8px;
     right: 8px;
     font-size: 16px;
+    color: #bca37f;
 }
 
 /* ============================================================
@@ -364,11 +370,15 @@
         font-size: 28px;
     }
     
+    .current-reading-value {
+        font-size: 40px;
+    }
+    
     .tag-grid {
         grid-template-columns: 1fr;
     }
     
-    .tag-button {
+    .tag-button-unified {
         flex-direction: row;
         justify-content: flex-start;
         padding: 14px 16px;
@@ -404,4 +414,66 @@
 
 .modal-sheet::-webkit-scrollbar-thumb:hover {
     background: #bca37f;
+}
+
+/* ============================================================
+   ストックのグリッド修正
+   全てのカードを同じ幅・高さに統一
+   ============================================================ */
+
+#stock-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+    padding-bottom: 40px;
+}
+
+#stock-list .stock-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    min-height: 140px;
+    aspect-ratio: 1 / 1;
+}
+
+#stock-list .stock-card:active {
+    transform: scale(0.95);
+}
+
+/* ストックカード内の要素 */
+#stock-list .stock-card .stock-kanji {
+    font-size: 56px !important;
+    font-weight: 900;
+    color: #5d5444;
+    margin-bottom: 8px;
+}
+
+#stock-list .stock-card .stock-strokes {
+    font-size: 12px;
+    color: #a6967a;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+#stock-list .stock-card .stock-position {
+    font-size: 11px;
+    color: #bca37f;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* スーパーライクの星表示 */
+#stock-list .stock-card .stock-stars {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 20px;
 }
