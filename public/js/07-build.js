@@ -37,20 +37,20 @@ function renderStock() {
         return;
     }
     
-    
     // スーパーライク優先でソート
     const sortedLiked = [...liked].sort((a, b) => {
         if (a.type === 'super' && b.type !== 'super') return -1;
         if (a.type !== 'super' && b.type === 'super') return 1;
         return a.slot - b.slot;
     });
+    
     // 読み仮名別にグループ化
     const groupedByReading = {};
     segments.forEach((seg, idx) => {
         if (!groupedByReading[seg]) {
             groupedByReading[seg] = [];
         }
-        const items = liked.filter(item => item.slot === idx);
+        const items = sortedLiked.filter(item => item.slot === idx);
         groupedByReading[seg].push(...items);
     });
     
@@ -59,9 +59,9 @@ function renderStock() {
         const items = groupedByReading[reading];
         
         if (items.length > 0) {
-            // グループヘッダー
+            // グループヘッダー（独立行）
             const header = document.createElement('div');
-            header.className = 'col-span-2 mt-6 mb-3';
+            header.className = 'col-span-4 mt-6 mb-3';  // col-span-4に変更
             header.innerHTML = `
                 <div class="flex items-center gap-3">
                     <div class="h-px flex-1 bg-[#d4c5af]"></div>
@@ -79,15 +79,11 @@ function renderStock() {
                 card.className = 'stock-card';
                 card.onclick = () => showDetailByData(item);
                 
-                const slotInfo = segments.findIndex(seg => 
-                    liked.filter(i => i.slot === segments.indexOf(seg) && i['漢字'] === item['漢字']).length > 0
-                );
-                
                 card.innerHTML = `
                     <div class="stock-kanji">${item['漢字']}</div>
                     <div class="text-xs text-[#bca37f] font-bold mt-2">${item['画数']}画</div>
-                    <div class="text-[10px] text-[#a6967a] mt-1">${slotInfo + 1}文字目</div>
-                    ${item.isSuper ? '<div class="text-[#8ab4f8] text-2xl mt-2">★</div>' : ''}
+                    <div class="text-[10px] text-[#a6967a] mt-1">${item.slot + 1}文字目</div>
+                    ${item.type === 'super' ? '<div class="text-[#8ab4f8] text-2xl mt-2">★</div>' : ''}
                 `;
                 container.appendChild(card);
             });
