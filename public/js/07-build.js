@@ -39,8 +39,8 @@ function renderStock() {
     
     // スーパーライク優先でソート
     const sortedLiked = [...liked].sort((a, b) => {
-        if (a.type === 'super' && b.type !== 'super') return -1;
-        if (a.type !== 'super' && b.type === 'super') return 1;
+        if (a.isSuper && !b.isSuper) return -1;
+        if (!a.isSuper && b.isSuper) return 1;
         return a.slot - b.slot;
     });
     
@@ -61,7 +61,7 @@ function renderStock() {
         if (items.length > 0) {
             // グループヘッダー（独立行）
             const header = document.createElement('div');
-            header.className = 'col-span-4 mt-6 mb-3';  // col-span-4に変更
+            header.className = 'col-span-4 mt-6 mb-3';
             header.innerHTML = `
                 <div class="flex items-center gap-3">
                     <div class="h-px flex-1 bg-[#d4c5af]"></div>
@@ -83,7 +83,7 @@ function renderStock() {
                     <div class="stock-kanji">${item['漢字']}</div>
                     <div class="text-xs text-[#bca37f] font-bold mt-2">${item['画数']}画</div>
                     <div class="text-[10px] text-[#a6967a] mt-1">${item.slot + 1}文字目</div>
-                    ${item.type === 'super' ? '<div class="text-[#8ab4f8] text-2xl mt-2">★</div>' : ''}
+                    ${item.isSuper ? '<div class="text-[#8ab4f8] text-2xl mt-2">★</div>' : ''}
                 `;
                 container.appendChild(card);
             });
