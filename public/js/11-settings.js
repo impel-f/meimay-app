@@ -57,94 +57,84 @@ function renderSettingsUnified() {
     const strictText = rule === 'strict' ? '厳格' : '柔軟';
     const fortuneText = prioritizeFortune ? '重視する' : '参考程度';
     
-    container.innerHTML = `
+container.innerHTML = `
         <div class="settings-unified">
-            <div class="settings-item-unified" onclick="openSurnameInput()">
-                <div class="item-icon-circle" style="background: #fef2f2;">
-                    <span style="color: #f87171;">👤</span>
+            <div class="group-label">Basic Settings</div>
+            <div class="settings-group">
+                <div class="settings-item-unified" onclick="openSurnameInput()">
+                    <div class="item-icon-circle" style="background: #fef2f2;"><span style="color: #f87171;">👤</span></div>
+                    <div class="item-content-unified">
+                        <div class="item-title-unified">苗字</div>
+                        <div class="item-value-unified">${surnameStr || '未設定'}</div>
+                    </div>
+                    <div class="item-arrow-unified">›</div>
                 </div>
-                <div class="item-content-unified">
-                    <div class="item-title-unified">苗字</div>
-                    <div class="item-value-unified">${surnameStr || '未設定'}</div>
+                
+                <div class="settings-item-unified" onclick="openGenderInput()">
+                    <div class="item-icon-circle" style="background: #f0fdf4;"><span style="color: #4ade80;">👶</span></div>
+                    <div class="item-content-unified">
+                        <div class="item-title-unified">性別</div>
+                        <div class="item-value-unified">${genderText}</div>
+                    </div>
+                    <div class="item-arrow-unified">›</div>
                 </div>
-                <div class="item-arrow-unified">›</div>
+            </div>
+
+            <div class="group-label">Preferences</div>
+            <div class="settings-group">
+                <div class="settings-item-unified" onclick="editImageTags()">
+                    <div class="item-icon-circle" style="background: #fef9c3;"><span style="color: #facc15;">🎨</span></div>
+                    <div class="item-content-unified">
+                        <div class="item-title-unified">イメージ</div>
+                        <div class="item-value-unified">${tagCount}</div>
+                    </div>
+                    <div class="item-arrow-unified">›</div>
+                </div>
+                
+                <div class="settings-item-unified" onclick="openReadingInput()">
+                    <div class="item-icon-circle" style="background: #eff6ff;"><span style="color: #60a5fa;">あ</span></div>
+                    <div class="item-content-unified">
+                        <div class="item-title-unified">読み方</div>
+                        <div class="item-value-unified">${segments.join('') || '未設定'}</div>
+                    </div>
+                    <div class="item-arrow-unified">›</div>
+                </div>
+
+                <div class="settings-item-unified" onclick="openReadingStyleInput()">
+                    <div class="item-icon-circle" style="background: #f5f3ff;"><span style="color: #a78bfa;">🔍</span></div>
+                    <div class="item-content-unified">
+                        <div class="item-title-unified">読みの厳密さ</div>
+                        <div class="item-value-unified">${strictText}</div>
+                    </div>
+                    <div class="item-arrow-unified">›</div>
+                </div>
+                
+                <div class="settings-item-unified" onclick="editFortunePriority()">
+                    <div class="item-icon-circle" style="background: #fef3c7;"><span style="color: #f59e0b;">⭐</span></div>
+                    <div class="item-content-unified">
+                        <div class="item-title-unified">姓名判断</div>
+                        <div class="item-value-unified">${fortuneText}</div>
+                    </div>
+                    <div class="item-arrow-unified">›</div>
+                </div>
             </div>
             
-            <div class="settings-item-unified" onclick="openGenderInput()">
-                <div class="item-icon-circle" style="background: #f0fdf4;">
-                    <span style="color: #4ade80;">👶</span>
+            <div class="group-label">Other</div>
+            <div class="settings-group">
+                <div class="settings-item-unified" onclick="showGuide()">
+                    <div class="item-icon-circle" style="background: #f0f9ff;"><span style="color: #0ea5e9;">📖</span></div>
+                    <div class="item-content-unified">
+                        <div class="item-title-unified">使い方ガイド</div>
+                    </div>
+                    <div class="item-arrow-unified">›</div>
                 </div>
-                <div class="item-content-unified">
-                    <div class="item-title-unified">性別</div>
-                    <div class="item-value-unified">${genderText}</div>
-                </div>
-                <div class="item-arrow-unified">›</div>
-            </div>
-            
-            <div class="settings-item-unified" onclick="editImageTags()">
-                <div class="item-icon-circle" style="background: #fef9c3;">
-                    <span style="color: #facc15;">🎨</span>
-                </div>
-                <div class="item-content-unified">
-                    <div class="item-title-unified">イメージ</div>
-                    <div class="item-value-unified">${tagCount}</div>
-                </div>
-                <div class="item-arrow-unified">›</div>
-            </div>
-            
-            <div class="settings-item-unified" onclick="openReadingInput()">
-                <div class="item-icon-circle" style="background: #eff6ff;">
-                    <span style="color: #60a5fa;">あ</span>
-                </div>
-                <div class="item-content-unified">
-                    <div class="item-title-unified">読み方</div>
-                    <div class="item-value-unified">${segments.join('') || '未設定'}</div>
-                </div>
-                <div class="item-arrow-unified">›</div>
-            </div>
-            
-            <div class="settings-item-unified" onclick="openReadingStyleInput()">
-                <div class="item-icon-circle" style="background: #f5f3ff;">
-                    <span style="color: #a78bfa;">🔍</span>
-                </div>
-                <div class="item-content-unified">
-                    <div class="item-title-unified">読みの厳密さ</div>
-                    <div class="item-value-unified">${strictText}</div>
-                </div>
-                <div class="item-arrow-unified">›</div>
-            </div>
-            
-            <div class="settings-item-unified" onclick="editFortunePriority()">
-                <div class="item-icon-circle" style="background: #fef3c7;">
-                    <span style="color: #f59e0b;">⭐</span>
-                </div>
-                <div class="item-content-unified">
-                    <div class="item-title-unified">姓名判断</div>
-                    <div class="item-value-unified">${fortuneText}</div>
-                </div>
-                <div class="item-arrow-unified">›</div>
-            </div>
-            
-            <div class="settings-divider-unified"></div>
-            
-            <div class="settings-item-unified" onclick="showGuide()">
-                <div class="item-icon-circle" style="background: #f0f9ff;">
-                    <span style="color: #0ea5e9;">📖</span>
-                </div>
-                <div class="item-content-unified">
-                    <div class="item-title-unified">使い方ガイド</div>
-                </div>
-                <div class="item-arrow-unified">›</div>
             </div>
             
             <div class="settings-close-area">
-                <button onclick="closeSettings()" class="btn-close-settings">
-                    閉じる
-                </button>
+                <button onclick="closeSettings()" class="btn-close-settings">設定を閉じる</button>
             </div>
         </div>
     `;
-}
 
 /**
  * 苗字入力画面
