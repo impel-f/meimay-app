@@ -423,15 +423,15 @@
 
 #stock-list {
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 16px !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 12px !important;
     padding-bottom: 40px;
 }
 
 #stock-list .stock-card {
     background: white;
-    border-radius: 20px;
-    padding: 20px;
+    border-radius: 16px;
+    padding: 12px 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -439,7 +439,7 @@
     cursor: pointer;
     transition: all 0.2s;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    min-height: 140px;
+    min-height: 100px;
     aspect-ratio: 1 / 1;
 }
 
@@ -449,31 +449,31 @@
 
 /* ストックカード内の要素 */
 #stock-list .stock-card .stock-kanji {
-    font-size: 56px !important;
+    font-size: 40px !important;
     font-weight: 900;
     color: #5d5444;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 #stock-list .stock-card .stock-strokes {
-    font-size: 12px;
+    font-size: 10px;
     color: #a6967a;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
 }
 
 #stock-list .stock-card .stock-position {
-    font-size: 11px;
+    font-size: 9px;
     color: #bca37f;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 /* スーパーライクの星表示 */
 #stock-list .stock-card .stock-stars {
     display: flex;
-    gap: 4px;
-    margin-top: 8px;
-    font-size: 20px;
+    gap: 2px;
+    margin-top: 4px;
+    font-size: 14px;
 }
