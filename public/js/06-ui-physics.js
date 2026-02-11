@@ -158,7 +158,8 @@ function executeSwipe(dir, data) {
             liked.push({ 
                 ...data, 
                 slot: currentPos, 
-                isSuper: (dir === 'up') 
+                isSuper: (dir === 'up'),
+                sessionReading: segments.join('') // この行を追加
             });
             
             // ストックチェック
