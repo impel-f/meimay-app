@@ -474,7 +474,12 @@ function showFortuneDetail() {
         container.appendChild(sansai);
     }
     
-    renderFortuneDetails(container, res, getNum);
+renderFortuneDetails(container, res, getNum);
+    
+    // for-descをクリア（候補を表示しない）
+    const descEl = document.getElementById('for-desc');
+    if (descEl) descEl.innerHTML = '';
+    
     modal.classList.add('active');
 }
 
