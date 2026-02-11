@@ -229,52 +229,178 @@ function loadStack() {
         
         if (prevChoices.length > 0) {
             // 「々」を追加
-            const noma = {
-                '漢字': '々',
-                '画数': prevChoices[0]['画数'] || 3,
-                '音': target,
-                '訓': target,
-                '伝統名のり': target,
-                '意味': '同じ字を繰り返す記号。前の文字と同じ意味を持ちます。',
-                'おすすめ度': 5,
-                '名前のイメージ': '繰り返し',
-                '分類': '記号',
-                priority: 1
-            };
-            
-            stack.unshift(noma);
-            console.log("ENGINE: Added 々 (noma) to stack");
-        }
-    }
-
-    // ソート（優先度 → スコア → 画数）
-    stack.sort((a, b) => {
-        if (a.priority !== b.priority) return a.priority - b.priority;
-        
-        const scoreA = calculateKanjiScore(a);
-        const scoreB = calculateKanjiScore(b);
-        if (scoreB !== scoreA) return scoreB - scoreA;
-        
-        return a['画数'] - b['画数'];
-    });
-
-    console.log(`ENGINE: Stack built with ${stack.length} candidates`);
-    
-    // 候補なし
-    if (stack.length === 0) {
-        console.warn("ENGINE: No candidates found");
-        alert(`「${target}」に対応する漢字が見つかりませんでした。\n柔軟モードをお試しください。`);
+/**
+ * スワイプ用スタックの生成（性別＋イメージタグフィルター対応）
+ */
+function loadStack() {
+    if (!segments || segments.length === 0) {
+        console.error("ENGINE: Segments not defined");
         return;
     }
     
-    // レンダリング
+    const target = toHira(segments[currentPos]);
+    console.log(`ENGINE: Loading stack for position ${currentPos + 1}: "${target}"`);
+    
+    // インジケーター更新
+    const indicator = document.getElementById('pos-indicator');
+    if (indicator) {
+        const totalSlots = segments.length;
+        const slotLabel = totalSlots === 2 ? 
+            (currentPos === 0 ? '1文字目' : '2文字目') :
+            (currentPos === 0 ? '1文字目' : currentPos === totalSlots - 1 ? `${totalSlots}文字目` : `${currentPos + 1}文字目`);
+        
+        indicator.innerText = `${slotLabel}：${target}`;
+    }
+    
+    // フィルタリング
+    stack = master.filter(k => {
+        // 同じ読みが続く場合は、seenチェックをスキップ
+        const isSameReading = currentPos > 0 && segments[currentPos] === segments[currentPos - 1];
+        
+        if (!isSameReading && seen && seen.has(k['漢字'])) {
+            return false; // 通常は既選択を除外
+        }
+        
+        // 読みデータの取得
+        const readings = (k['音'] + ',' + k['訓'] + ',' + k['伝統名のり'])
+            .split(/[、,，\s/]+/)
+            .map(x => toHira(x))
+            .filter(x => x);
+        
+        // 読みマッチング判定
+        k.priority = readings.includes(target) ? 1 : 
+                     (readings.some(r => r.startsWith(target)) ? 2 : 0);
+        
+        // ルールに応じてフィルタ
+        return rule === 'strict' ? k.priority === 1 : k.priority > 0;
+    });
+    
+    // 々（同じ字点）の対応
+    if (currentPos > 0 && segments[currentPos] === segments[currentPos - 1]) {
+        const prevChoices = liked.filter(item => item.slot === currentPos - 1);
+        
+        if (prevChoices.length > 0) {
+            stack.push({
+                '漢字': '々',
+                '画数': prevChoices[0]['画数'],
+                '音': '',
+                '訓': '',
+                '伝統名のり': '',
+                '意味': '前の漢字を繰り返す',
+                '名前のイメージ': '【繰り返し】',
+                '分類': '【記号】',
+                priority: 1
+            });
+        }
+    }
+    
+    // 性別による優先順位付け（イメージタグの前に実行）
+    stack = applyGenderFilter(stack);
+    
+    // イメージタグによる優先順位付け
+    stack = applyImageTagFilter(stack);
+    
+    // 優先度でソート
+    stack.sort((a, b) => {
+        // まず読みの優先度（priority）
+        if (a.priority !== b.priority) return a.priority - b.priority;
+        // 次に性別の優先度（genderPriority）
+        if (a.genderPriority !== b.genderPriority) return a.genderPriority - b.genderPriority;
+        // 次にイメージタグの優先度（imagePriority）
+        if (a.imagePriority !== b.imagePriority) return a.imagePriority - b.imagePriority;
+        // 最後に画数
+        return a['画数'] - b['画数'];
+    });
+    
+    console.log(`ENGINE: Stack loaded with ${stack.length} candidates`);
+    
     currentIdx = 0;
+    
     if (typeof render === 'function') {
         render();
-    } else {
-        console.error("ENGINE: render() function not found");
     }
 }
+
+/**
+ * 性別フィルター適用
+ */
+function applyGenderFilter(kanjis) {
+    if (!gender || gender === 'neutral') {
+        // 指定なしの場合は全て同じ優先度
+        kanjis.forEach(k => k.genderPriority = 1);
+        return kanjis;
+    }
+    
+    // イメージタグのマッピング（性別判定用キーワード）
+    const maleKeywords = ['力強', '剛', '勇', '雄', '男', '太', '大', '翔', '斗', '輝', '陽', '壮大', 'リーダー', '成功'];
+    const femaleKeywords = ['優', '美', '麗', '花', '菜', '子', '愛', '華', '彩', '音', '里', '柔', '優しさ', '慈愛', '清らか'];
+    
+    return kanjis.map(k => {
+        const img = k['名前のイメージ'] || '';
+        const meaning = k['意味'] || '';
+        const combined = img + meaning;
+        
+        // キーワードマッチング
+        const isMale = maleKeywords.some(kw => combined.includes(kw));
+        const isFemale = femaleKeywords.some(kw => combined.includes(kw));
+        
+        if (gender === 'male') {
+            k.genderPriority = isMale ? 1 : (isFemale ? 3 : 2);
+        } else if (gender === 'female') {
+            k.genderPriority = isFemale ? 1 : (isMale ? 3 : 2);
+        } else {
+            k.genderPriority = 1;
+        }
+        
+        return k;
+    });
+}
+
+/**
+ * イメージタグフィルター適用
+ */
+function applyImageTagFilter(kanjis) {
+    // 「こだわらない」が選択されている場合
+    if (!selectedImageTags || selectedImageTags.includes('none')) {
+        kanjis.forEach(k => k.imagePriority = 1);
+        return kanjis;
+    }
+    
+    // タグとキーワードのマッピング
+    const tagKeywords = {
+        'nature': ['自然', '植物', '樹木', '草', '森', '木', '花', '華やか', '桜'],
+        'brightness': ['明るさ', '太陽', '陽', '光', '輝き', '晴れ', '朗らか'],
+        'water': ['海', '水', '川', '波', '流れ', '清らか'],
+        'strength': ['強さ', '力', '剛健', '勇敢', '勇気', '活力', '壮大'],
+        'kindness': ['優しさ', '慈愛', '愛情', '思いやり', '温かさ', '柔らか'],
+        'intelligence': ['知性', '賢さ', '才能', '優秀', '学問', '智恵'],
+        'honesty': ['誠実', '真面目', '実直', '正直', '真摯'],
+        'elegance': ['品格', '高貴', '気品', '上品', '優雅', '格調'],
+        'tradition': ['伝統', '古風', '和', '雅', '伝統的'],
+        'beauty': ['美', '麗しい', '艶やか', '華麗', '美しい'],
+        'success': ['成功', '向上', '昇進', '発展', '繁栄', '栄える'],
+        'peace': ['安定', '平和', '平穏', '安らか', '穏やか', '調和'],
+        'leadership': ['リーダー', '統率', '王者', '主導', '指導'],
+        'hope': ['希望', '未来', '夢', '願い', '期待', '幸福'],
+        'spirituality': ['精神', '心', '魂', '意志', '信念', '純粋']
+    };
+    
+    return kanjis.map(k => {
+        const img = k['名前のイメージ'] || '';
+        const meaning = k['意味'] || '';
+        const combined = img + meaning;
+        
+        // 選択されたタグのいずれかにマッチするかチェック
+        const matches = selectedImageTags.some(tagId => {
+            const keywords = tagKeywords[tagId] || [];
+            return keywords.some(kw => combined.includes(kw));
+        });
+        
+        k.imagePriority = matches ? 1 : 2;
+        return k;
+    });
+}
+
 
 /**
  * 漢字のスコアリング
